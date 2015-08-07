@@ -7,7 +7,7 @@
 
 /// Entry Point ///
 
-var API_KEY = 'AIzaSyDJ4Q6YfoMPQPsg-GxCjDu7S7I_5FaT1Oo'
+var API_KEY = 'YourAPIkey'
 
 googleApiClientReady = function() {
 
