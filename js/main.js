@@ -7,15 +7,7 @@
 
 /// Entry Point ///
 
-var API_KEY = 'YourAPIkey'
-
-googleApiClientReady = function() {
-
-	gapi.client.setApiKey(API_KEY);
-	gapi.client.load('youtube', 'v3', function(){
-		makeRequest('GameGrumps', 10);
-	});}
-
+var API_KEY = 'YOUR_API_KEY';
 
 /**
  * Creates a request to retrieve the uploads playlist id of a user
@@ -97,7 +89,8 @@ function main() {
     // TODO(JRC): Implement this function so that the page document is filled
     // with the names of the 10 most recent uploads from some YouTube channel.
 
-    console.log( "Hello, world!" );
+    gapi.client.setApiKey(API_KEY);
+	gapi.client.load('youtube', 'v3', function(){
+		makeRequest('GameGrumps', 10);
+	});
 }
-
-$( document ).ready( main );
