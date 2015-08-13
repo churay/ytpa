@@ -5,17 +5,13 @@
  * client-specific data and configuration.
  */
 
-// NOTE(JRC): There is going to be a problem here related to how GitHub web hosting
-// works.  Since GitHub hosting requires that the code for the website exist on
-// a public repository branch, the Google AppID for "ytpa" must be public to
-// allow the GitHub host to send YouTube requests.  For more information, see
-// https://developers.google.com/console/help/new/#apikeybestpractices.
-
-var ytpa.config = {
-    // TODO(JRC): Fill in the application ID for the "ytpa" instance here.
-    // To view or generate the ID, go to https://console.developers.google.com/start.
-    appid: "",
-
-    // TODO(JRC): Fill in your user identifier (i.e. Google account name) here.
-    appuser: "",
-};
+( function( ytpa, $, undefined ) {
+    // TODO(JRC): Make this variable private once the main script is adjusted
+    // to the new library style.
+    ytpa.config = {
+        // TODO: Fill in your user name for the application here.
+        appuser: "",
+        // TODO: Fill in the API key for the application here.
+        appid: "",
+    };
+}( window.ytpa = window.ytpa || {}, jQuery ));
