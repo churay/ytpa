@@ -8,12 +8,10 @@
 ( function(ytpa, $, undefined) {
     /// Public Members ///
 
-    var config = config || {};
+    ytpa.config = ytpa.config || {};
 
-    // TODO: Fill in your user name for the application here.
-    config.appuser = '';
+    ytpa.config.appuser = '';
 
-    // TODO: Fill in the API key for the application here.
-    config.appid = '';
+    ytpa.config.appid = '';
 
 }(window.ytpa = window.ytpa || {}, jQuery) );
