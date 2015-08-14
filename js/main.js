@@ -48,7 +48,6 @@ function requestPlaylist(playlistID, numResults) {
             var videoId = playlistItems[i].contentDetails.videoId;
             requestVideoInfo(videoId);
         }
-        
     });
 }
 
@@ -68,7 +67,6 @@ function requestVideoInfo(videoId) {
         console.log(title);
     });
 }
-
 
 function main() {
     gapi.client.setApiKey(ytpa.config.appid);

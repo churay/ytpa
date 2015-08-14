@@ -5,13 +5,15 @@
  * client-specific data and configuration.
  */
 
-( function( ytpa, $, undefined ) {
-    // TODO(JRC): Make this variable private once the main script is adjusted
-    // to the new library style.
-    ytpa.config = {
-        // TODO: Fill in your user name for the application here.
-        appuser: "",
-        // TODO: Fill in the API key for the application here.
-        appid: "",
-    };
-}( window.ytpa = window.ytpa || {}, jQuery ));
+( function(ytpa, $, undefined) {
+    /// Public Members ///
+
+    var config = config || {};
+
+    // TODO: Fill in your user name for the application here.
+    config.appuser = '';
+
+    // TODO: Fill in the API key for the application here.
+    config.appid = '';
+
+}(window.ytpa = window.ytpa || {}, jQuery) );
