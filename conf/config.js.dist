@@ -10,8 +10,10 @@
 
     ytpa.config = ytpa.config || {};
 
+    // TODO: Fill in your user name for the application here.
     ytpa.config.appuser = '';
 
+    // TODO: Fill in the API key for the application here.
     ytpa.config.appid = '';
 
 }(window.ytpa = window.ytpa || {}, jQuery) );
