@@ -14,13 +14,14 @@
      */
     ytpa.init = function() {
         gapi.client.setApiKey(ytpa.config.appid);
+
         gapi.client.load('youtube', 'v3', function() {
             ytpa.query.requestUploads('GameGrumps', 10);
         });
-    }
+    };
 
 }(window.ytpa = window.ytpa || {}, jQuery) );
 
 // TODO(JRC): This line shouldn't be necessary, but the "onload" parameter for the
 // Google client API will only work if the function is a global function.
-ytpa_init = ytpa.init
+var ytpa_init = ytpa.init;

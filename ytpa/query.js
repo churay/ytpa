@@ -25,7 +25,7 @@
             var userUploadsID = response.result.items[0].contentDetails.relatedPlaylists.uploads;
             ytpa.query.requestPlaylist(userUploadsID, numResults);
         });
-    }
+    };
 
 
     /**
@@ -47,7 +47,7 @@
                 ytpa.query.requestVideoInfo(videoId);
             }
         });
-    }
+    };
 
     /**
      * Creates a request to retrieve the information for a given video.
@@ -64,6 +64,6 @@
             var title = response.result.items[0].snippet.title;
             console.log(title);
         });
-    }
+    };
 
 }(window.ytpa = window.ytpa || {}, jQuery) );
