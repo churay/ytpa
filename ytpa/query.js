@@ -11,9 +11,9 @@
     ytpa.query = ytpa.query || {};
 
     /**
-     * Creates a request to retrieve the uploads for a given user.
+     * Creates a request to process the uploads for a given user with the given function.
      */
-    ytpa.query.requestUploads = function(user, numResults) {
+    ytpa.query.processUploads = function(user, callback, numResults = 10) {
         var requestOptions = {
             part: 'contentDetails',
             forUsername: user,
@@ -21,17 +21,16 @@
 
         var request = gapi.client.youtube.channels.list(requestOptions);
 
-        request.execute(function(response) {
-            var userUploadsID = response.result.items[0].contentDetails.relatedPlaylists.uploads;
-            ytpa.query.requestPlaylist(userUploadsID, numResults);
+        request.then(function(response) {
+            var uploadsPlaylistID = response.result.items[0].contentDetails.relatedPlaylists.uploads;
+            ytpa.query.processPlaylist(uploadsPlaylistID, callback, numResults);
         });
     };
 
-
     /**
-     * Creates a request to retrieve the videos in the given playlist.
+     * Creates a request to process the videos in the given playlist with the given function.
      */
-    ytpa.query.requestPlaylist = function(playlistID, numResults) {
+    ytpa.query.processPlaylist = function(playlistID, callback, numResults = 10) {
         var requestOptions = {
             part: 'contentDetails',
             playlistId: playlistID,
@@ -40,29 +39,28 @@
 
         var request = gapi.client.youtube.playlistItems.list(requestOptions);
 
-        request.execute(function(response) {
+        request.then(function(response) {
+            var playlistBatchRequest = gapi.client.newBatch();
+
             var playlistItems = response.result.items;
-            for (var videoIdx = 0; videoIdx < playlistItems.length; ++videoIdx) {
-                var videoId = playlistItems[videoIdx].contentDetails.videoId;
-                ytpa.query.requestVideoInfo(videoId);
+            for(var videoIdx in playlistItems) {
+                var videoID = playlistItems[videoIdx].contentDetails.videoId;
+                var videoOptions = { part: 'snippet', id: videoID };
+
+                var videoRequest = gapi.client.youtube.videos.list(videoOptions);
+                playlistBatchRequest.add(videoRequest);
             }
-        });
-    };
 
-    /**
-     * Creates a request to retrieve the information for a given video.
-     */
-    ytpa.query.requestVideoInfo = function(videoID) {
-        var requestOptions = {
-            part: 'snippet',
-            id: videoID,
-        };
+            playlistBatchRequest.then(function(response) {
+                var playlistResponseMap = response.result;
+                var playlistItems = [];
+                for(var playlistResponseID in playlistResponseMap) {
+                    var videoResponse = playlistResponseMap[playlistResponseID];
+                    playlistItems.push(videoResponse.result.items[0].snippet);
+                }
 
-        var request = gapi.client.youtube.videos.list(requestOptions);
-
-        request.execute(function(response) {
-            var title = response.result.items[0].snippet.title;
-            console.log(title);
+                callback(playlistItems);
+            });
         });
     };
 
