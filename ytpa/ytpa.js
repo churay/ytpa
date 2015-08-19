@@ -16,10 +16,10 @@
         gapi.client.setApiKey(ytpa.config.appid);
 
         gapi.client.load('youtube', 'v3', function() {
-            ytpa.query.processUploads('GameGrumps', function(uploads) {
-                for(var uploadIdx in uploads)
-                    console.log(uploads[uploadIdx]);
-            } );
+            ytpa.query.processPlaylists('GameGrumps', function(playlists) {
+                for(var playlistIdx in playlists)
+                    console.log(playlists[playlistIdx]);
+            });
         });
     };
 

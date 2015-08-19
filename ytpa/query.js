@@ -11,6 +11,49 @@
     ytpa.query = ytpa.query || {};
 
     /**
+     * Creates a request to process the playlists for a user with the given function.
+     */
+    ytpa.query.processPlaylists = function(user, callback, numResults = 10) {
+        var uidRequestOptions = {
+            part: 'id',
+            forUsername: user,
+        };
+
+        var uidRequest = gapi.client.youtube.channels.list(uidRequestOptions);
+
+        uidRequest.then(function(response) {
+            var channelID = response.result.items[0].id;
+            var plidRequestOptions = {
+                part: 'id',
+                channelId: channelID,
+                maxResults: numResults,
+            };
+
+            var plidRequest = gapi.client.youtube.playlists.list(plidRequestOptions);
+
+            plidRequest.then(function(response) {
+                var playlistRObjs = response.result.items;
+                var plinfoRequestOptions = {
+                    part: 'snippet',
+                    id: playlistRObjs.map(function(v, i, a){ return v.id; }).join(','),
+                    maxResults: numResults,
+                };
+
+                var plinfoRequest = gapi.client.youtube.playlists.list(plinfoRequestOptions);
+
+                plinfoRequest.then(function(response) {
+                    var playlistRObjs = response.result.items;
+                    var playlists = [];
+                    for(var playlistIdx in playlistRObjs)
+                        playlists.push(playlistRObjs[playlistIdx].snippet);
+
+                    callback(playlists);
+                });
+            });
+        });
+    };
+
+    /**
      * Creates a request to process the uploads for a given user with the given function.
      */
     ytpa.query.processUploads = function(user, callback, numResults = 10) {
