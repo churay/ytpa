@@ -11,17 +11,16 @@
     ytpa.query = ytpa.query || {};
 
     /**
-     * Creates a request to process the playlists for a user with the given function.
+     * Returns a promise that returns all of the playlist objects for a given user.
      */
-    ytpa.query.processPlaylists = function(user, callback, numResults = 10) {
+    ytpa.query.playlists = function(user, numResults = 10) {
         var uidRequestOptions = {
             part: 'id',
             forUsername: user,
         };
 
         var uidRequest = gapi.client.youtube.channels.list(uidRequestOptions);
-
-        uidRequest.then(function(response) {
+        return uidRequest.then(function(response) {
             var channelID = response.result.items[0].id;
             var plidRequestOptions = {
                 part: 'id',
@@ -30,59 +29,52 @@
             };
 
             var plidRequest = gapi.client.youtube.playlists.list(plidRequestOptions);
+            return plidRequest;
 
-            plidRequest.then(function(response) {
-                var playlistRObjs = response.result.items;
-                var plinfoRequestOptions = {
-                    part: 'snippet',
-                    id: playlistRObjs.map(function(v, i, a){ return v.id; }).join(','),
-                    maxResults: numResults,
-                };
+        }).then(function(response) {
+            var playlistRObjs = response.result.items;
+            var plinfoRequestOptions = {
+                part: 'snippet',
+                id: playlistRObjs.map(function(v, i, a){ return v.id; }).join(','),
+                maxResults: numResults,
+            };
 
-                var plinfoRequest = gapi.client.youtube.playlists.list(plinfoRequestOptions);
+            var plinfoRequest = gapi.client.youtube.playlists.list(plinfoRequestOptions);
+            return plinfoRequest;
 
-                plinfoRequest.then(function(response) {
-                    var playlistRObjs = response.result.items;
-                    var playlists = [];
-                    for(var playlistIdx in playlistRObjs)
-                        playlists.push(playlistRObjs[playlistIdx].snippet);
+        }).then(function(response) {
+            var playlistRObjs = response.result.items;
+            var playlists = [];
+            for(var playlistIdx in playlistRObjs)
+                playlists.push(playlistRObjs[playlistIdx].snippet);
 
-                    callback(playlists);
-                });
-            });
+            return playlists;
+
         });
     };
 
     /**
-     * Creates a request to process the uploads for a given user with the given function.
+     * Returns a promise that returns all of the upload objects for a given user.
      */
-    ytpa.query.processUploads = function(user, callback, numResults = 10) {
-        var requestOptions = {
+    ytpa.query.uploads = function(user, numResults = 10) {
+        var uplRequestOptions = {
             part: 'contentDetails',
             forUsername: user,
         };
 
-        var request = gapi.client.youtube.channels.list(requestOptions);
+        var uplRequest = gapi.client.youtube.channels.list(uplRequestOptions);
+        return uplRequest.then(function(response) {
+            var uploadsPLID = response.result.items[0].contentDetails.relatedPlaylists.uploads;
+            var uplplRequestOptions = {
+                part: 'contentDetails',
+                playlistId: uploadsPLID,
+                maxResults: numResults,
+            };
 
-        request.then(function(response) {
-            var uploadsPlaylistID = response.result.items[0].contentDetails.relatedPlaylists.uploads;
-            ytpa.query.processPlaylist(uploadsPlaylistID, callback, numResults);
-        });
-    };
+            var uplplRequest = gapi.client.youtube.playlistItems.list(uplplRequestOptions);
+            return uplplRequest;
 
-    /**
-     * Creates a request to process the videos in the given playlist with the given function.
-     */
-    ytpa.query.processPlaylist = function(playlistID, callback, numResults = 10) {
-        var requestOptions = {
-            part: 'contentDetails',
-            playlistId: playlistID,
-            maxResults: numResults,
-        };
-
-        var request = gapi.client.youtube.playlistItems.list(requestOptions);
-
-        request.then(function(response) {
+        }).then(function(response) {
             var playlistBatchRequest = gapi.client.newBatch();
 
             var playlistItems = response.result.items;
@@ -94,16 +86,19 @@
                 playlistBatchRequest.add(videoRequest);
             }
 
-            playlistBatchRequest.then(function(response) {
-                var playlistResponseMap = response.result;
-                var playlistItems = [];
-                for(var playlistResponseID in playlistResponseMap) {
-                    var videoResponse = playlistResponseMap[playlistResponseID];
-                    playlistItems.push(videoResponse.result.items[0].snippet);
-                }
+            return playlistBatchRequest;
 
-                callback(playlistItems);
-            });
+        }).then(function(response) {
+            var playlistResponseMap = response.result;
+
+            var playlistItems = [];
+            for(var playlistResponseID in playlistResponseMap) {
+                var videoResponse = playlistResponseMap[playlistResponseID];
+                playlistItems.push(videoResponse.result.items[0].snippet);
+            }
+
+            return playlistItems;
+
         });
     };
 

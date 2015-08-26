@@ -15,11 +15,24 @@
     ytpa.init = function() {
         gapi.client.setApiKey(ytpa.config.appid);
 
-        gapi.client.load('youtube', 'v3', function() {
-            ytpa.query.processPlaylists('GameGrumps', function(playlists) {
-                for(var playlistIdx in playlists)
-                    console.log(playlists[playlistIdx]);
-            });
+        gapi.client.load('youtube', 'v3').then(function() {
+            return ytpa.query.playlists('GameGrumps');
+
+        }).then(function(playlists) {
+            console.log('Playlists for Game Grumps:');
+
+            for(var playlistIdx in playlists)
+                console.log(playlists[playlistIdx]);
+
+        }).then(function() {
+            return ytpa.query.uploads('GameGrumps');
+
+        }).then(function(uploads) {
+            console.log('Uploads for Game Grumps:');
+
+            for(var uploadIdx in uploads)
+                console.log(uploads[uploadIdx]);
+
         });
     };
 
