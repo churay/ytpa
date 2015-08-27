@@ -13,7 +13,8 @@
     /**
      * Returns a promise that returns all of the playlist objects for a given user.
      */
-    ytpa.query.playlists = function(user, numResults = 10) {
+    ytpa.query.playlists = function(user, numResults) {
+        var numResults = (numResults !== undefined) ? numResults : 10;
         var uidRequestOptions = {
             part: 'id',
             forUsername: user,
@@ -56,7 +57,8 @@
     /**
      * Returns a promise that returns all of the upload objects for a given user.
      */
-    ytpa.query.uploads = function(user, numResults = 10) {
+    ytpa.query.uploads = function(user, numResults) {
+        var numResults = (numResults !== undefined) ? numResults : 10;
         var uplRequestOptions = {
             part: 'contentDetails',
             forUsername: user,
