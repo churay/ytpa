@@ -5,10 +5,15 @@
 		<title>YouTube Playlist Analyzer</title>
 
 		<!-- CSS Imports -->
-		<!-- <link rel="stylesheet" href=""> -->
+
+		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap-theme.min.css">
+
+		<link rel="stylesheet" href="misc/ytpa.css">
 
 		<!-- JavaScript Imports -->
 		<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
+		<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
 
 		<script src="conf/config.js"></script>
 		<script src="ytpa/query.js"></script>
@@ -19,6 +24,98 @@
 	</head>
 
 	<body>
-		<p>Hello, world!</p>
+		<div class="container">
+
+			<div id="ytpa-header" class="row">
+				<div class="col-md-12 text-center">
+					<h1>YouTube Playlist Analyzer</h1>
+				</div>
+			</div>
+
+			<div id="ytpa-content" class="row">
+				<div id="ytpa-control-container" class="col-md-3 panel-primary text-center">
+
+					<div class="panel panel-primary">
+						<div class="panel-heading text-center">
+							<h3 class="panel-title">Data</h3>
+						</div>
+						<div class="panel-body">
+							<form>
+								<div class="form-group">
+									<label for="ytpa-channel">Channel</label>
+									<div class="input-group">
+										<input type="text" class="form-control" id="ytpa-channel">
+										<span class="input-group-btn">
+											<button class="btn btn-primary" type="button">Search</button>
+										</span>
+									</div>
+								</div>
+							</form>
+
+							<form>
+								<div class="form-group">
+									<label for="ytpa-playlist">Playlist</label>
+									<select class="form-control" id="ytpa-playlist">
+										<option>Playlist #1</option>
+										<option>Playlist #2</option>
+										<option>Playlist #3</option>
+									</select>
+								</div>
+							</form>
+						</div>
+					</div>
+
+					<div class="panel panel-primary">
+						<div class="panel-heading text-center">
+							<h3 class="panel-title">Graph</h3>
+						</div>
+						<div class="panel-body">
+							<form class="form-horizontal">
+								<div class="form-group">
+									<label for="ytpa-statistic" class="col-sm-2 control-label">Data</label>
+									<div class="col-sm-10">
+										<select class="form-control" id="ytpa-statistic">
+											<option>View Count</option>
+											<option>Like/Dislike Counts</option>
+											<option>Like/Dislike Ratios</option>
+											<option>Comment Count</option>
+										</select>
+									</div>
+								</div>
+							</form>
+
+							<form class="form-horizontal">
+								<div class="form-group">
+									<label for="ytpa-graphtype" class="col-sm-2 control-label">Type</label>
+									<div class="col-sm-10">
+										<select class="form-control" id="ytpa-graphtype">
+											<option>Series</option>
+											<option>Collection</option>
+										</select>
+									</div>
+								</div>
+							</form>
+
+							<form class="form-horizontal">
+								<div class="form-group">
+									<label for="ytpa-scale" class="col-sm-2 control-label">Scale</label>
+									<div class="col-sm-10">
+										<select class="form-control" id="ytpa-scale">
+											<option>Absolute</option>
+											<option>Relative</option>
+										</select>
+									</div>
+								</div>
+							</form>
+						</div>
+					</div>
+
+				</div>
+				<div id="ytpa-graph-container" class="col-md-9 well well-sm">
+					<svg id="ytpa-graph"></svg>
+				</div>
+			</div>
+
+		</div>
 	</body>
 </html>

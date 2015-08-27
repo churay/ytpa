@@ -13,6 +13,8 @@
      * must be called before calling any other library functions.
      */
     ytpa.init = function() {
+        $("#ytpa-graph-container").height($("#ytpa-graph-container").width());
+
         gapi.client.setApiKey(ytpa.config.appid);
 
         gapi.client.load('youtube', 'v3').then(function() {

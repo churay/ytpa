@@ -1,0 +1,15 @@
+/**
+ * @file ytpa.css
+ *
+ * A file containing all of the supplementary sheet styling used for the
+ * "ytpa" application.
+ */
+
+#ytpa-header {
+    padding-bottom: 10px;
+}
+
+#ytpa-graph {
+    width: 100%;
+    height: 100%;
+}
