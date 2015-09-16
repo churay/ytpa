@@ -9,7 +9,9 @@
     /// Public Members ///
 
     ytpa.query = ytpa.query || {};
-    var results = []; 
+
+    /** The maximum number of results that can be returned from any YouTube request. */
+    ytpa.query.MAXRESULTS = 50;
 
     /**
      * Returns a promise that returns all of the playlist objects for a given user.
@@ -51,6 +53,7 @@
                 playlists.push(playlistRObjs[playlistIdx].snippet);
 
             return playlists;
+
         });
     };
 
@@ -58,9 +61,7 @@
      * Returns a promise that returns all of the upload objects for a given user.
      */
     ytpa.query.uploads = function(user, numResults) {
-        var numResults = (numResults !== undefined) ? numResults : 65;
-        var uploadsPLID;
-        
+        var numResults = (numResults !== undefined) ? numResults : 10;
         var uplRequestOptions = {
             part: 'contentDetails',
             forUsername: user,
@@ -68,79 +69,70 @@
 
         var uplRequest = gapi.client.youtube.channels.list(uplRequestOptions);
         return uplRequest.then(function(response) {
-            uploadsPLID = response.result.items[0].contentDetails.relatedPlaylists.uploads;
+            var uploadsPLID = response.result.items[0].contentDetails.relatedPlaylists.uploads;
+            var uplplRequestOptions = {
+                part: 'contentDetails',
+                playlistId: uploadsPLID,
+                maxResults: numResults,
+            };
 
-            return requestAllVideos(numResults, uploadsPLID);
+            var uplplRequest = gapi.client.youtube.playlistItems.list(uplplRequestOptions);
+            return uplplRequest;
+
         }).then(function(response) {
-            var promises = [];
-            var playlistItems = flatten(response);
+            var playlistBatchRequest = gapi.client.newBatch();
 
+            var playlistItems = response.result.items;
             for(var videoIdx in playlistItems) {
                 var videoID = playlistItems[videoIdx].contentDetails.videoId;
                 var videoOptions = { part: 'snippet', id: videoID };
 
                 var videoRequest = gapi.client.youtube.videos.list(videoOptions);
-                promises.push(videoRequest);
+                playlistBatchRequest.add(videoRequest);
             }
-            return promises;
+
+            return playlistBatchRequest;
 
         }).then(function(response) {
-            return Promise.all(response).then(function(promiseArr) {
-                var playlistItems = []
+            var playlistResponseMap = response.result;
 
-                promiseArr.forEach(function(response) {
-                    playlistItems.push(response.result.items[0].snippet);
-                });
-                return playlistItems;
-            });
+            var playlistItems = [];
+            for(var playlistResponseID in playlistResponseMap) {
+                var videoResponse = playlistResponseMap[playlistResponseID];
+                playlistItems.push(videoResponse.result.items[0].snippet);
+            }
+
+            return playlistItems;
+
         });
     };
 
     /**
-     * Returns the first remaining results of a playlist
+     * Returns a promise the returns all of the items for a given request.
      */
-    function requestAllVideos(remaining, ID, nextToken) {
-        if (remaining === 0) {
-            return results;
+    ytpa.query.allitems = function(requestFunction, requestOptions, _results) {
+        if(!("maxResults" in requestionsOptions))
+            throw TypeError("Request options must define 'maxResults' field.");
+
+        var _results = (_results !== undefined) ? _results : [];
+
+        requestOptions.maxResults = Math.min(ytpa.query.MAXRESULTS, requestOptions.maxResults);
+        requestOptions.pageToken = (_nextToken !== undefined) ? _nextToken : undefined;
+
+        if(requestOptions.maxResults <= 0) {
+            return new Promise(function(resolveFunction, errorFunction) {
+                resolveFunction(_results);
+            });
+        } else {
+            var ytRequest = requestFunction( requestOptions );
+            return ytRequest.then(function(response) {
+                var nextRequestOptions = jQuery.extend(true, {}, requestOptions);
+                nextRequestOptions.maxResults = requestOptions.maxResults - ytpa.query.MAXRESULTS;
+                nextRequestOptions.pageToken = response.result.nextPageToken;
+
+                return ytpa.query.allitems(requestFunction, nextRequestOptions, _results + response.result.items);
+            });
         }
+    };
 
-        var uplplRequestOptions = {
-                part: 'contentDetails',
-                playlistId: ID,
-                maxResults: 50,
-        };
-        
-        if (remaining < 51) {
-            uplplRequestOptions.maxResults = remaining;
-            remaining = 0;
-        } 
-        else
-            remaining -= 50;
-
-        
-        if (nextToken)
-            uplplRequestOptions.pageToken = nextToken;
-
-        var request = gapi.client.youtube.playlistItems.list(uplplRequestOptions);
-
-        return request.then(function(response) {
-            var npt = response.result.nextPageToken;
-            results.push(response.result.items);
-
-            return requestAllVideos(remaining, ID, npt);
-        });
-    }
-
-    // Borrowed from stack overflow: http://stackoverflow.com/questions/27266550/how-to-flatten-nested-array-in-javascript
-    function flatten(ary) {
-        var ret = [];
-        for(var i = 0; i < ary.length; i++) {
-            if(Array.isArray(ary[i])) {
-                ret = ret.concat(flatten(ary[i]));
-            } else {
-                ret.push(ary[i]);
-            }
-        }
-        return ret;
-    }
 }(window.ytpa = window.ytpa || {}, jQuery) );
