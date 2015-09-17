@@ -32,28 +32,33 @@
                 maxResults: numResults,
             };
 
-            var plidRequest = gapi.client.youtube.playlists.list(plidRequestOptions);
-            return plidRequest;
+            return ytpa.query.allitems( gapi.client.youtube.playlists.list,
+                plidRequestOptions );
 
         }).then(function(response) {
-            var playlistRObjs = response.result.items;
-            var plinfoRequestOptions = {
-                part: 'snippet',
-                id: playlistRObjs.map(function(v, i, a){ return v.id; }).join(','),
-                maxResults: numResults,
-            };
+            var playlistInfoBatchRequest = gapi.client.newBatch();
 
-            var plinfoRequest = gapi.client.youtube.playlists.list(plinfoRequestOptions);
-            return plinfoRequest;
+            var playlistObjects = response;
+            for(var playlistIdx in playlistObjects) {
+                var playlistObject = playlistObjects[playlistIdx];
+                var playlistOptions = { part: 'snippet', id: playlistObject.id };
+
+                var playlistRequest = gapi.client.youtube.playlists.list(playlistOptions);
+                playlistInfoBatchRequest.add(playlistRequest);
+            }
+
+            return playlistInfoBatchRequest;
 
         }).then(function(response) {
-            var playlistRObjs = response.result.items;
+            var playlistResponseMap = response.result;
+
             var playlists = [];
-            for(var playlistIdx in playlistRObjs)
-                playlists.push(playlistRObjs[playlistIdx].snippet);
+            for(var playlistResponseID in playlistResponseMap) {
+                var playlistResponse = playlistResponseMap[playlistResponseID];
+                playlists.push(playlistResponse.result.items[0].snippet);
+            }
 
             return playlists;
-
         });
     };
 
@@ -76,13 +81,13 @@
                 maxResults: numResults,
             };
 
-            var uplplRequest = gapi.client.youtube.playlistItems.list(uplplRequestOptions);
-            return uplplRequest;
+            return ytpa.query.allitems( gapi.client.youtube.playlistItems.list,
+                uplplRequestOptions );
 
         }).then(function(response) {
             var playlistBatchRequest = gapi.client.newBatch();
 
-            var playlistItems = response.result.items;
+            var playlistItems = response; 
             for(var videoIdx in playlistItems) {
                 var videoID = playlistItems[videoIdx].contentDetails.videoId;
                 var videoOptions = { part: 'snippet', id: videoID };
@@ -111,26 +116,24 @@
      * Returns a promise the returns all of the items for a given request.
      */
     ytpa.query.allitems = function(requestFunction, requestOptions, _results) {
-        if(!("maxResults" in requestionsOptions))
+        if(!("maxResults" in requestOptions))
             throw TypeError("Request options must define 'maxResults' field.");
 
         var _results = (_results !== undefined) ? _results : [];
-
+        var numResultsRemaining = requestOptions.maxResults - ytpa.query.MAXRESULTS;
         requestOptions.maxResults = Math.min(ytpa.query.MAXRESULTS, requestOptions.maxResults);
-        requestOptions.pageToken = (_nextToken !== undefined) ? _nextToken : undefined;
 
         if(requestOptions.maxResults <= 0) {
-            return new Promise(function(resolveFunction, errorFunction) {
-                resolveFunction(_results);
-            });
+            return _results;
         } else {
             var ytRequest = requestFunction( requestOptions );
             return ytRequest.then(function(response) {
+                var nextRequestResults = _results.concat(response.result.items);
                 var nextRequestOptions = jQuery.extend(true, {}, requestOptions);
-                nextRequestOptions.maxResults = requestOptions.maxResults - ytpa.query.MAXRESULTS;
+                nextRequestOptions.maxResults = numResultsRemaining;
                 nextRequestOptions.pageToken = response.result.nextPageToken;
 
-                return ytpa.query.allitems(requestFunction, nextRequestOptions, _results + response.result.items);
+                return ytpa.query.allitems(requestFunction, nextRequestOptions, nextRequestResults);
             });
         }
     };
