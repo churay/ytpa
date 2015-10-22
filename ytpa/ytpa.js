@@ -32,8 +32,15 @@
 
             for(var uploadIdx in uploads)
                 console.log(uploads[uploadIdx]);
+        }).then(function() {
+            return ytpa.query.playlistvideos('PLRQGRBgN_EnrnYydSvpPryrXOII-bJNMp');
 
-        });
+        }).then(function(videos) {
+            console.log('Information for Mario Galaxy playlist (' + videos.length + '):');
+
+            for(var videoIdx in videos)
+                console.log(videos[videoIdx].snippet.title + ' has ' + videos[videoIdx].statistics.viewCount + ' views');
+        });;
     };
 
 }(window.ytpa = window.ytpa || {}, jQuery) );
