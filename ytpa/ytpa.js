@@ -41,7 +41,9 @@
         }).then(function(videos) {
             console.log('Information for Mario Galaxy playlist (' + videos.length + '):');
 
-            for(var videosIdx in videos)
+            var sortedVids = videos.sort(function(a,b){ return a.snippet.publishedAt > b.snippet.publishedAt ? 1 : -1 });
+
+            for(var videosIdx in sortedVids)
                 console.log(videos[videosIdx].snippet.title + ' has ' + videos[videosIdx].statistics.viewCount + ' views');
         });
     };
