@@ -5,7 +5,6 @@
 		<title>YouTube Playlist Analyzer</title>
 
 		<!-- CSS Imports -->
-
 		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
 		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap-theme.min.css">
 
@@ -21,6 +20,7 @@
 		<script src="ytpa/plot.js"></script>
 		<script src="ytpa/ytpa.js"></script>
 
+		<script src="https://www.google.com/jsapi?autoload={'modules':[{'name': 'visualization', 'version': '1.0', 'packages': ['corechart'],'callback': 'ytpa.plot.init'}]}"></script>
 		<script src="https://apis.google.com/js/client.js?onload=ytpa_init"></script>
 	</head>
 
@@ -112,8 +112,7 @@
 					</div>
 
 				</div>
-				<div id="ytpa-graph-container" class="col-md-9 well well-sm">
-					<svg id="ytpa-graph"></svg>
+				<div id="ytpa-graph" class="col-md-9 well well-sm">
 				</div>
 			</div>
 

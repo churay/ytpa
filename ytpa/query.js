@@ -113,6 +113,48 @@
     };
 
     /**
+     * Returns a promise that contains all the objects(information) in a playlist given a playlist id.
+     * 
+     * Information contains:
+     * Title, id, channelId, description
+     * CommentCount, dislikeCount, likeCount, favoriteCount, viewCount
+     */
+    ytpa.query.playlistvideos = function(playlistID) {
+        var requestOptions = {
+            part: 'contentDetails',
+            playlistId: playlistID,
+            maxResults: 100,
+        };
+
+        return ytpa.query.allitems(gapi.client.youtube.playlistItems.list, requestOptions
+        ).then(function(response) {
+            var playlistBatchRequest = gapi.client.newBatch();
+
+            var playlistItems = response; 
+            for(var videoIdx in playlistItems) {
+                var videoID = playlistItems[videoIdx].contentDetails.videoId;
+                var videoOptions = { part: 'statistics, snippet', id: videoID };
+
+                var videoRequest = gapi.client.youtube.videos.list(videoOptions);
+                playlistBatchRequest.add(videoRequest);
+            }
+
+            return playlistBatchRequest;
+
+        }).then(function(response) {
+            var playlistResponseMap = response.result;
+
+            var playlistItems = [];
+            for(var playlistResponseID in playlistResponseMap) {
+                var videoResponse = playlistResponseMap[playlistResponseID];
+                playlistItems.push(videoResponse.result.items[0]);
+            }
+
+            return playlistItems;
+        });
+    };
+
+    /**
      * Returns a promise that returns all of the items for a given request.
      */
     ytpa.query.allitems = function(requestFunction, requestOptions, _results) {
@@ -137,49 +179,5 @@
             });
         }
     };
-
-    /**
-     * Returns a promise that contains all the objects(information) in a playlist given a playlist id.
-     * 
-     * Information contains:
-     * Title, id, channelId, description
-     * CommentCount, dislikeCount, likeCount, favoriteCount, viewCount
-     */
-    ytpa.query.playlistVideoInfo = function(playlistID) {
-        var requestOptions = {
-            part: 'contentDetails',
-            playlistId: playlistID,
-            maxResults: 100,
-        };
-
-        return ytpa.query.allitems( gapi.client.youtube.playlistItems.list,
-            requestOptions).then(function(response){
-                var playlistBatchRequest = gapi.client.newBatch();
-
-                var playlistItems = response; 
-                for(var videoIdx in playlistItems) {
-                    var videoID = playlistItems[videoIdx].contentDetails.videoId;
-                    var videoOptions = { part: 'statistics, snippet', id: videoID };
-
-                    var videoRequest = gapi.client.youtube.videos.list(videoOptions);
-                    playlistBatchRequest.add(videoRequest);
-                }
-
-                return playlistBatchRequest;
-
-        }).then(function(response){
-            var playlistResponseMap = response.result;
-
-            var playlistItems = [];
-            for(var playlistResponseID in playlistResponseMap) {
-                var videoResponse = playlistResponseMap[playlistResponseID];
-                playlistItems.push(videoResponse.result.items[0]);
-            }
-
-            return playlistItems;
-        });
-    };
-
-
 
 }(window.ytpa = window.ytpa || {}, jQuery) );
