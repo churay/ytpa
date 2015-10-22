@@ -41,7 +41,7 @@
             var playlistObjects = response;
             for(var playlistIdx in playlistObjects) {
                 var playlistObject = playlistObjects[playlistIdx];
-                var playlistOptions = { part: 'snippet', id: playlistObject.id };
+                var playlistOptions = { part: 'snippet,id', id: playlistObject.id };
 
                 var playlistRequest = gapi.client.youtube.playlists.list(playlistOptions);
                 playlistInfoBatchRequest.add(playlistRequest);
@@ -55,7 +55,7 @@
             var playlists = [];
             for(var playlistResponseID in playlistResponseMap) {
                 var playlistResponse = playlistResponseMap[playlistResponseID];
-                playlists.push(playlistResponse.result.items[0].snippet);
+                playlists.push(playlistResponse.result.items[0]);
             }
 
             return playlists;
@@ -90,7 +90,7 @@
             var playlistItems = response; 
             for(var videoIdx in playlistItems) {
                 var videoID = playlistItems[videoIdx].contentDetails.videoId;
-                var videoOptions = { part: 'snippet', id: videoID };
+                var videoOptions = { part: 'snippet,id', id: videoID };
 
                 var videoRequest = gapi.client.youtube.videos.list(videoOptions);
                 playlistBatchRequest.add(videoRequest);
@@ -104,7 +104,7 @@
             var playlistItems = [];
             for(var playlistResponseID in playlistResponseMap) {
                 var videoResponse = playlistResponseMap[playlistResponseID];
-                playlistItems.push(videoResponse.result.items[0].snippet);
+                playlistItems.push(videoResponse.result.items[0]);
             }
 
             return playlistItems;

@@ -22,25 +22,29 @@
             console.log('Playlists for Game Grumps (' + playlists.length + '):');
 
             for(var playlistIdx in playlists)
-                console.log(playlists[playlistIdx]);
+                console.log(playlists[playlistIdx].id, playlists[playlistIdx].snippet.title);
 
         }).then(function() {
-            return ytpa.query.uploads('GameGrumps', 60);
-
-        }).then(function(uploads) {
-            console.log('Uploads for Game Grumps (' + uploads.length + '):');
-
-            for(var uploadIdx in uploads)
-                console.log(uploads[uploadIdx]);
-        }).then(function() {
-            return ytpa.query.playlistvideos('PLRQGRBgN_EnrnYydSvpPryrXOII-bJNMp');
+            return ytpa.query.playlistvideos('PLRQGRBgN_EnqD-KpeLv67tiP5myXmEG1b');
 
         }).then(function(videos) {
-            console.log('Information for Mario Galaxy playlist (' + videos.length + '):');
+            // TODO(JRC): Move this functionality to the "plot.js" script and create
+            // a double dependency in this script on the "YouTube" API and
+            // the "Charts" API.
+            var chartRawData = videos.map(function(video, videoIdx) {
+                return [parseInt(videoIdx) + 1, parseInt(video.statistics.viewCount)];
+            });
+            chartRawData.unshift(["View Count", "Pokemon FireRed"]);
 
-            for(var videoIdx in videos)
-                console.log(videos[videoIdx].snippet.title + ' has ' + videos[videoIdx].statistics.viewCount + ' views');
-        });;
+            var chartData = google.visualization.arrayToDataTable(chartRawData);
+            var chartOptions = {
+                hAxis: {title: "Video Number"},
+                vAxis: {title: "View Count"},
+            };
+
+            var chart = new google.visualization.LineChart(document.getElementById("ytpa-graph"));
+            chart.draw(chartData, chartOptions);
+        });
     };
 
 }(window.ytpa = window.ytpa || {}, jQuery) );
