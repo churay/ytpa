@@ -15,4 +15,22 @@
 
     };
 
+    ytpa.plot.drawChart = function(videos) {
+    	var playlistTitle = $("#ytpa-playlist option:selected").text();
+
+    	var chartRawData = videos.map(function(video, videoIdx) {
+                return [parseInt(videoIdx) + 1, parseInt(video.statistics.viewCount)];
+            });
+        chartRawData.unshift(["View Count", playlistTitle]);
+
+        var chartData = google.visualization.arrayToDataTable(chartRawData);
+        var chartOptions = {
+            hAxis: {title: "Video Number"},
+            vAxis: {title: "View Count"},
+        };
+
+        var chart = new google.visualization.LineChart(document.getElementById("ytpa-graph"));
+        chart.draw(chartData, chartOptions);
+    };
+
 }(window.ytpa = window.ytpa || {}, jQuery) );
