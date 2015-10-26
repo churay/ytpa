@@ -14,23 +14,24 @@
     *   playlist selector with options
     */
     $("#ytpa-channel-submit").click(function(){
-        var channelId = $("#ytpa-channel").val();
-        
-        try {
-            ytpa.query.playlists(channelId, 3).then(function(playlists) {
-                var playlistOptions = $("#ytpa-playlist");
+        var channelName = $("#ytpa-channel").val();
 
-                for(var idx in playlists) {
-                    var playlist = document.createElement("option");
-                    playlist.setAttribute("value", playlists[idx].id);
-                    playlist.innerHTML = playlists[idx].snippet.title;
-                    playlistOptions.append(playlist);
-                }
-            });
-        }
-        catch(err) {
-            console.log("Invalid channel name");
-        }
+        if (ytpa.storage.checkChannels(channelName)) {
+            try {
+                ytpa.query.playlists(channelName, 5).then(function(playlists) {
+                    var playlistOptions = $("#ytpa-playlist");
+                    for(var idx in playlists) {
+                        var playlist = document.createElement("option");
+                        playlist.setAttribute("value", playlists[idx].id);
+                        playlist.innerHTML = playlists[idx].snippet.title;
+                        playlistOptions.append(playlist);
+                    }
+                });
+            }
+            catch(err) {
+                console.log("Invalid channel name");
+            }   
+        }     
     });
 
     /*
