@@ -16,24 +16,30 @@
     $("#ytpa-channel-submit").click(function(){
         var channelName = $("#ytpa-channel").val();
 
-        if (ytpa.storage.checkChannels(channelName)) {
-            try {
-                ytpa.query.playlists(channelName, 5).then(function(playlists) {
-                    var playlistOptions = $("#ytpa-playlist");
+        try {
+            ytpa.query.playlists(channelName, 5).then(function(playlists) {
+                var playlistOptions = $("#ytpa-playlist");
+
+                if (channelName == playlistOptions.attr("data-playlist"))
+                    return;
+                else {
+                    playlistOptions.empty();
+                    playlistOptions.attr("data-playlist", channelName);
                     for(var idx in playlists) {
                         var playlist = document.createElement("option");
                         playlist.setAttribute("value", playlists[idx].id);
+                        playlist.setAttribute("data-playlist", playlists[idx].id);
                         playlist.innerHTML = playlists[idx].snippet.title;
                         playlistOptions.append(playlist);
                     }
-                });
-            }
-            catch(err) {
-                console.log("Invalid channel name");
-            }   
-        }     
+                }
+            });
+        }
+        catch(err) {
+            console.log("Invalid channel name");
+        }   
     });
-
+    
     /*
     *   Handles logic for selecting an option and drawing updated chart
     */
