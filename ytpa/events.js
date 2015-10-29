@@ -28,7 +28,6 @@
                     for(var idx in playlists) {
                         var playlist = document.createElement("option");
                         playlist.setAttribute("value", playlists[idx].id);
-                        playlist.setAttribute("data-playlist", playlists[idx].id);
                         playlist.innerHTML = playlists[idx].snippet.title;
                         playlistOptions.append(playlist);
                     }
