@@ -25,12 +25,20 @@
                 else {
                     playlistOptions.empty();
                     playlistOptions.attr("data-playlist", channelName);
+
                     for(var idx in playlists) {
                         var playlist = document.createElement("option");
                         playlist.setAttribute("value", playlists[idx].id);
                         playlist.innerHTML = playlists[idx].snippet.title;
                         playlistOptions.append(playlist);
                     }
+                    
+                    var playlistId = $("#ytpa-playlist option:selected").val();
+
+                    ytpa.query.playlistvideos(playlistId).then(function(videos) {
+                        ytpa.plot.drawChart(videos);
+                    });
+
                 }
             });
         }
