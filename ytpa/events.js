@@ -41,7 +41,7 @@
         var playlistId = $("#ytpa-playlist option:selected").val();
 
         ytpa.query.playlistvideos(playlistId).then(function(videos) {
-            ytpa.plot.drawChart(videos);
+            ytpa.plot.playlist(videos);
         });
     });
 

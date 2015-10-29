@@ -17,7 +17,6 @@
      * Returns a promise that returns all of the playlist objects for a given user.
      */
     ytpa.query.playlists = function(user, numResults) {
-        var numResults = (numResults !== undefined) ? numResults : 10;
         var uidRequestOptions = {
             part: 'id',
             forUsername: user,
@@ -29,11 +28,10 @@
             var plidRequestOptions = {
                 part: 'id',
                 channelId: channelID,
-                maxResults: numResults,
             };
 
-            return ytpa.query.allitems( gapi.client.youtube.playlists.list,
-                plidRequestOptions );
+            return ytpa.query.items( gapi.client.youtube.playlists.list,
+                plidRequestOptions, numResults );
 
         }).then(function(response) {
             var playlistInfoBatchRequest = gapi.client.newBatch();
@@ -66,7 +64,6 @@
      * Returns a promise that returns all of the upload objects for a given user.
      */
     ytpa.query.uploads = function(user, numResults) {
-        var numResults = (numResults !== undefined) ? numResults : 10;
         var uplRequestOptions = {
             part: 'contentDetails',
             forUsername: user,
@@ -78,11 +75,10 @@
             var uplplRequestOptions = {
                 part: 'contentDetails',
                 playlistId: uploadsPLID,
-                maxResults: numResults,
             };
 
-            return ytpa.query.allitems( gapi.client.youtube.playlistItems.list,
-                uplplRequestOptions );
+            return ytpa.query.items( gapi.client.youtube.playlistItems.list,
+                uplplRequestOptions, numResults );
 
         }).then(function(response) {
             var playlistBatchRequest = gapi.client.newBatch();
@@ -112,27 +108,22 @@
     };
 
     /**
-     * Returns a promise that contains all the objects(information) in a playlist given a playlist id.
-     * 
-     * Information contains:
-     * Title, id, channelId, description
-     * CommentCount, dislikeCount, likeCount, favoriteCount, viewCount
+     * Returns a promise that contains all the videos in a playlist given its ID.
      */
     ytpa.query.playlistvideos = function(playlistID) {
         var requestOptions = {
             part: 'contentDetails',
             playlistId: playlistID,
-            maxResults: 100,
         };
 
-        return ytpa.query.allitems(gapi.client.youtube.playlistItems.list, requestOptions
+        return ytpa.query.items(gapi.client.youtube.playlistItems.list, requestOptions
         ).then(function(response) {
             var playlistBatchRequest = gapi.client.newBatch();
 
             var playlistItems = response; 
             for(var videoIdx in playlistItems) {
                 var videoID = playlistItems[videoIdx].contentDetails.videoId;
-                var videoOptions = { part: 'statistics, snippet', id: videoID };
+                var videoOptions = { part: 'statistics,snippet', id: videoID };
 
                 var videoRequest = gapi.client.youtube.videos.list(videoOptions);
                 playlistBatchRequest.add(videoRequest);
@@ -156,27 +147,26 @@
     };
 
     /**
-     * Returns a promise that returns all of the items for a given request.
+     * Returns a promise that returns the items for a given request.
      */
-    ytpa.query.allitems = function(requestFunction, requestOptions, _results) {
-        if(!("maxResults" in requestOptions))
-            throw TypeError("Request options must define 'maxResults' field.");
-
+    ytpa.query.items = function(requestFunction, requestOptions, numResults, _results) {
+        var numResults = (numResults !== undefined) ? numResults : Number.POSITIVE_INFINITY;
         var _results = (_results !== undefined) ? _results : [];
-        var numResultsRemaining = requestOptions.maxResults - ytpa.query.MAXRESULTS;
-        requestOptions.maxResults = Math.min(ytpa.query.MAXRESULTS, requestOptions.maxResults);
 
-        if(requestOptions.maxResults <= 0) {
-            return _results;
+        if(_results.length >= numResults) {
+            return _results.slice(0, numResults);
         } else {
-            var ytRequest = requestFunction( requestOptions );
-            return ytRequest.then(function(response) {
-                var nextRequestResults = _results.concat(response.result.items);
+            requestOptions.maxResults = ytpa.query.MAXRESULTS;
+            return requestFunction(requestOptions).then(function(response) {
                 var nextRequestOptions = jQuery.extend(true, {}, requestOptions);
-                nextRequestOptions.maxResults = numResultsRemaining;
                 nextRequestOptions.pageToken = response.result.nextPageToken;
 
-                return ytpa.query.allitems(requestFunction, nextRequestOptions, nextRequestResults);
+                var nextRequestResults = _results.concat(response.result.items);
+                var nextNumResults = Math.min(numResults,
+                    response.result.pageInfo.totalResults);
+
+                return ytpa.query.items(requestFunction, nextRequestOptions,
+                    nextNumResults, nextRequestResults);
             });
         }
     };

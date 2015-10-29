@@ -16,13 +16,12 @@
 
 		<script src="conf/config.js"></script>
 		<script src="ytpa/lib.js"></script>
-		<script src="ytpa/plot.js"></script>
 		<script src="ytpa/query.js"></script>
+		<script src="ytpa/plot.js"></script>
 		<script src="ytpa/ytpa.js"></script>
 
-
-		<script src="https://www.google.com/jsapi?autoload={'modules':[{'name': 'visualization', 'version': '1.0', 'packages': ['corechart'], 'callback': 'ytpa.plot.init'}]}"></script>
-		<script src="https://apis.google.com/js/client.js?onload=ytpa_init"></script>
+		<script src="https://apis.google.com/js/client.js"></script>
+		<script src="https://www.google.com/jsapi?autoload={'modules':[{'name': 'visualization', 'version': '1.0', 'packages': ['corechart'], 'callback': 'ytpa.init'}]}"></script>
 	</head>
 
 	<body>
@@ -116,6 +115,7 @@
 
 		</div>
 	</body>
+
 	<script src="ytpa/storage.js"></script>
 	<script src="ytpa/events.js"></script>
 

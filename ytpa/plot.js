@@ -10,26 +10,21 @@
 
     ytpa.plot = ytpa.plot || {};
 
-    ytpa.plot.init = function() {
-        $("#ytpa-graph").height($("#ytpa-graph").width());
+    ytpa.plot.playlist = function(videos) {
+        var playlistTitle = $('#ytpa-playlist option:selected').text();
 
-    };
-
-    ytpa.plot.drawChart = function(videos) {
-    	var playlistTitle = $("#ytpa-playlist option:selected").text();
-
-    	var chartRawData = videos.map(function(video, videoIdx) {
+        var chartRawData = videos.map(function(video, videoIdx) {
                 return [parseInt(videoIdx) + 1, parseInt(video.statistics.viewCount)];
-            });
-        chartRawData.unshift(["View Count", playlistTitle]);
+        });
+        chartRawData.unshift(['View Count', playlistTitle]);
 
         var chartData = google.visualization.arrayToDataTable(chartRawData);
         var chartOptions = {
-            hAxis: {title: "Video Number"},
-            vAxis: {title: "View Count"},
+            hAxis: {title: 'Video Number'},
+            vAxis: {title: 'View Count'},
         };
 
-        var chart = new google.visualization.LineChart(document.getElementById("ytpa-graph"));
+        var chart = new google.visualization.LineChart(document.getElementById('ytpa-graph'));
         chart.draw(chartData, chartOptions);
     };
 
