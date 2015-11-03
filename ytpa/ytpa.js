@@ -16,13 +16,6 @@
         ytpaDocumentWait().then(ytpaDocumentInit).then(function() {
             gapi.client.setApiKey(ytpa.config.appid);
             return gapi.client.load('youtube', 'v3');
-
-        }).then(function() {
-            return ytpa.query.playlistvideos('PLRQGRBgN_EnqD-KpeLv67tiP5myXmEG1b');
-
-        }).then(function(videos) {
-            ytpa.plot.playlist(videos);
-
         });
     };
 
@@ -57,10 +50,11 @@
     function ytpaDocumentInit() {
         return new Promise(function(resolve) {
             $("#ytpa-channel-submit").click(function(){
-                var channelName = $("#ytpa-channel").val();
+                ytpa.plot.clear();
 
+                var channelName = $("#ytpa-channel").val();
                 try {
-                    ytpa.query.playlists(channelName, 5).then(function(playlists) {
+                    ytpa.query.playlists(channelName, 50).then(function(playlists) {
                         var playlistOptions = $("#ytpa-playlist");
 
                         if(channelName !== playlistOptions.attr("data-playlist")) {
@@ -76,8 +70,11 @@
                                 playlistOptions.append(playlistElement);
                             }
 
+                            var playlistName = $("#ytpa-playlist option:selected").text();
                             var playlistId = $("#ytpa-playlist option:selected").val();
-                            ytpa.query.playlistvideos(playlistId).then(ytpa.plot.playlist);
+                            ytpa.query.playlistvideos(playlistId).then(function(videos) {
+                                ytpa.plot.playlist(playlistName, videos);
+                            });
                         }
                     });
                 } catch(error) {
@@ -86,8 +83,11 @@
             });
 
             $("#ytpa-playlist").change(function(){
+                var playlistName = $("#ytpa-playlist option:selected").text();
                 var playlistId = $("#ytpa-playlist option:selected").val();
-                ytpa.query.playlistvideos(playlistId).then(ytpa.plot.playlist);
+                ytpa.query.playlistvideos(playlistId).then(function(videos) {
+                    ytpa.plot.playlist(playlistName, videos);
+                });
             });
 
             $("#ytpa-graph").height($("#ytpa-graph").width());
