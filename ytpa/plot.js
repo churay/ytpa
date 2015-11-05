@@ -21,8 +21,10 @@
             var playlistName = playlistNames[playlistIdx];
             var playlistID = playlistIDs[playlistIdx];
 
+            // TODO(JRC): Fix the problem here where the playlist name/id isn't
+            // being properly copied into the playlist request function.
             ytpaPlottedPlaylists[playlistID] = true;
-            if(!(playlistName in ytpaLoadedPlaylists)) {
+            if(!(playlistID in ytpaLoadedPlaylists)) {
                 playlistRequests.push(
                     ytpa.query.playlistvideos(playlistID).then(function(videos) {
                         return {id: playlistID, name: playlistName, videos: videos};
@@ -55,26 +57,36 @@
     ytpa.plot.draw = function() {
         var chartData = new google.visualization.DataTable();
         chartData.addColumn('number', 'Video Number');
-        for(var playlistID in ytpaPlottedPlaylists)
+        for(var playlistID in ytpaPlottedPlaylists) {
             chartData.addColumn('number', ytpaLoadedPlaylists[playlistID].name);
+            chartData.addColumn({type: 'string', role: 'tooltip', p: {'html': true}});
+        }
 
         var maxPlaylistLength = Math.max.apply(Math, $.map(ytpaPlottedPlaylists,
             function(plBool, plID) { return ytpaLoadedPlaylists[plID].videos.length }));
         for(var videoIdx = 0; videoIdx < maxPlaylistLength; ++videoIdx ) {
-            var playlistViewCounts = [videoIdx + 1];
+            var playlistVideoInfo = [videoIdx + 1];
             for(var playlistID in ytpaPlottedPlaylists) {
                 var playlist = ytpaLoadedPlaylists[playlistID];
-                var playlistVideoViewCount = (videoIdx < playlist.videos.length) ?
-                    parseInt(playlist.videos[videoIdx].statistics.viewCount) : null;
 
-                playlistViewCounts.push(playlistVideoViewCount);
+                var playlistVideoViews = null;
+                var playlistVideoTooltip = null;
+                if(videoIdx < playlist.videos.length) {
+                    var playlistVideo = playlist.videos[videoIdx];
+                    playlistVideoViews = parseInt(playlistVideo.statistics.viewCount);
+                    playlistVideoTooltip = ytpaGenerateTooltipHtml(playlistVideo, videoIdx + 1);
+                }
+
+                playlistVideoInfo.push(playlistVideoViews);
+                playlistVideoInfo.push(playlistVideoTooltip);
             }
 
-            chartData.addRow(playlistViewCounts);
+            chartData.addRow(playlistVideoInfo);
         }
 
         var chartOptions = {
-            title: 'Playlist Comparison for ' + $("#ytpa-channel").val(),
+            title: `Playlist Comparison for the "${$("#ytpa-channel").val()}" Channel`,
+            tooltip: {isHtml: true},
             hAxis: {title: 'Video Number'},
             vAxis: {title: 'View Count'},
         };
@@ -84,6 +96,16 @@
     };
 
     /// Private Members ///
+
+    /**
+     * Generates and returns the HTML for given video's tooltip.
+     */
+    function ytpaGenerateTooltipHtml(video, videoIdx) {
+        return `<div class="ytpa-video-tooltip"><p>
+            <b>Part ${videoIdx}</b>: ${video.snippet.title}<br>
+            <b>Views</b>: ${video.statistics.viewCount}<br>
+        </p></div>`;
+    }
 
     /** A list of all of the playlists that are currently loaded. **/
     var ytpaLoadedPlaylists = {};
