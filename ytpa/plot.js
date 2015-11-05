@@ -13,17 +13,39 @@
     /**
      * Adds the playlist (given as a list of videos) to the graph visualization.
      */
-    ytpa.plot.playlist = function(playlistName, playlistVideos) {
-        if(!(playlistName in ytpaPlottedPlaylists)) {
-            ytpaPlottedPlaylists[playlistName] = playlistVideos;
-            ytpa.plot.draw();
+    ytpa.plot.playlists = function(playlistNames, playlistIDs) {
+        ytpaPlottedPlaylists = {};
+
+        var playlistRequests = [];
+        for(var playlistIdx in playlistNames) {
+            var playlistName = playlistNames[playlistIdx];
+            var playlistID = playlistIDs[playlistIdx];
+
+            ytpaPlottedPlaylists[playlistID] = true;
+            if(!(playlistName in ytpaLoadedPlaylists)) {
+                playlistRequests.push(
+                    ytpa.query.playlistvideos(playlistID).then(function(videos) {
+                        return {id: playlistID, name: playlistName, videos: videos};
+                    })
+                );
+            }
         }
+
+        return Promise.all(playlistRequests).then(function(playlists) {
+            for(var playlistIdx in playlists) {
+                var playlist = playlists[playlistIdx];
+                ytpaLoadedPlaylists[playlist.id] = playlist;
+            }
+
+            ytpa.plot.draw();
+        });
     };
 
     /**
      * Clears all of the active playlist lines from the graph visualization.
      */
     ytpa.plot.clear = function() {
+        ytpaLoadedPlaylists = {};
         ytpaPlottedPlaylists = {};
     };
 
@@ -33,17 +55,17 @@
     ytpa.plot.draw = function() {
         var chartData = new google.visualization.DataTable();
         chartData.addColumn('number', 'Video Number');
-        for(var playlistName in ytpaPlottedPlaylists)
-            chartData.addColumn('number', playlistName);
+        for(var playlistID in ytpaPlottedPlaylists)
+            chartData.addColumn('number', ytpaLoadedPlaylists[playlistID].name);
 
         var maxPlaylistLength = Math.max.apply(Math, $.map(ytpaPlottedPlaylists,
-            function(playlistVideos, playlistName) { return playlistVideos.length }));
+            function(plBool, plID) { return ytpaLoadedPlaylists[plID].videos.length }));
         for(var videoIdx = 0; videoIdx < maxPlaylistLength; ++videoIdx ) {
             var playlistViewCounts = [videoIdx + 1];
-            for(var playlistName in ytpaPlottedPlaylists) {
-                var playlistVideos = ytpaPlottedPlaylists[playlistName];
-                var playlistVideoViewCount = (videoIdx < playlistVideos.length) ?
-                    parseInt(playlistVideos[videoIdx].statistics.viewCount) : null;
+            for(var playlistID in ytpaPlottedPlaylists) {
+                var playlist = ytpaLoadedPlaylists[playlistID];
+                var playlistVideoViewCount = (videoIdx < playlist.videos.length) ?
+                    parseInt(playlist.videos[videoIdx].statistics.viewCount) : null;
 
                 playlistViewCounts.push(playlistVideoViewCount);
             }
@@ -62,6 +84,9 @@
     };
 
     /// Private Members ///
+
+    /** A list of all of the playlists that are currently loaded. **/
+    var ytpaLoadedPlaylists = {};
 
     /** A list of all of the playlists currently being plotted. **/
     var ytpaPlottedPlaylists = {};

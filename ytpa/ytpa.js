@@ -49,48 +49,45 @@
      */
     function ytpaDocumentInit() {
         return new Promise(function(resolve) {
-            $("#ytpa-channel-submit").click(function(){
+            $('#ytpa-channel-submit').click(function(){
                 ytpa.plot.clear();
 
-                var channelName = $("#ytpa-channel").val();
+                var channelName = $('#ytpa-channel').val();
                 try {
                     ytpa.query.playlists(channelName, 50).then(function(playlists) {
-                        var playlistOptions = $("#ytpa-playlist");
+                        var playlistOptions = $('#ytpa-playlist');
 
-                        if(channelName !== playlistOptions.attr("data-playlist")) {
+                        if(channelName !== playlistOptions.attr('data-playlist')) {
                             playlistOptions.empty();
-                            playlistOptions.attr("data-playlist", channelName);
+                            playlistOptions.attr('data-playlist', channelName);
 
                             for(var playlistIdx in playlists) {
                                 var playlist = playlists[playlistIdx];
-                                var playlistElement = document.createElement("option");
+                                var playlistElement = document.createElement('option');
 
-                                playlistElement.setAttribute("value", playlist.id);
+                                playlistElement.setAttribute('value', playlist.id);
                                 playlistElement.innerHTML = playlist.snippet.title;
                                 playlistOptions.append(playlistElement);
                             }
-
-                            var playlistName = $("#ytpa-playlist option:selected").text();
-                            var playlistId = $("#ytpa-playlist option:selected").val();
-                            ytpa.query.playlistvideos(playlistId).then(function(videos) {
-                                ytpa.plot.playlist(playlistName, videos);
-                            });
                         }
                     });
                 } catch(error) {
-                    console.log("Invalid channel name!");
+                    console.log('Invalid channel name!');
                 }
             });
 
-            $("#ytpa-playlist").change(function(){
-                var playlistName = $("#ytpa-playlist option:selected").text();
-                var playlistId = $("#ytpa-playlist option:selected").val();
-                ytpa.query.playlistvideos(playlistId).then(function(videos) {
-                    ytpa.plot.playlist(playlistName, videos);
-                });
+            $('#ytpa-playlist').change(function() {
+                var playlistObjects = $('#ytpa-playlist option:selected');
+
+                var playlistIDs = playlistObjects.map(function() {
+                    return $(this).val(); }).get();
+                var playlistNames = playlistObjects.map(function() {
+                    return $(this).text(); }).get();
+
+                ytpa.plot.playlists(playlistNames, playlistIDs);
             });
 
-            $("#ytpa-graph").height($("#ytpa-graph").width());
+            $('#ytpa-graph').height($('#ytpa-graph').width());
 
             resolve();
         });
