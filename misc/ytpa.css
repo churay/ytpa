@@ -11,4 +11,6 @@
 
 .ytpa-video-tooltip {
     padding: 5px 5px 5px 5px;
+    white-space: nowrap;
 }
+
