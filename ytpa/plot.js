@@ -14,23 +14,21 @@
      * Adds the playlist (given as a list of videos) to the graph visualization.
      */
     ytpa.plot.playlists = function(playlistNames, playlistIDs) {
-        ytpaPlottedPlaylists = {};
+        var genPlaylistRequest = function(plname, plid) {
+            return ytpa.query.playlistvideos(plid).then(function(videos) {
+                return {id: plid, name: plname, videos: videos};
+            });
+        };
 
+        ytpaPlottedPlaylists = {};
         var playlistRequests = [];
         for(var playlistIdx in playlistNames) {
             var playlistName = playlistNames[playlistIdx];
             var playlistID = playlistIDs[playlistIdx];
 
-            // TODO(JRC): Fix the problem here where the playlist name/id isn't
-            // being properly copied into the playlist request function.
             ytpaPlottedPlaylists[playlistID] = true;
-            if(!(playlistID in ytpaLoadedPlaylists)) {
-                playlistRequests.push(
-                    ytpa.query.playlistvideos(playlistID).then(function(videos) {
-                        return {id: playlistID, name: playlistName, videos: videos};
-                    })
-                );
-            }
+            if(!(playlistID in ytpaLoadedPlaylists))
+                playlistRequests.push(genPlaylistRequest(playlistName, playlistID));
         }
 
         return Promise.all(playlistRequests).then(function(playlists) {
