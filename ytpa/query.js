@@ -137,7 +137,8 @@
             var playlistItems = [];
             for(var playlistResponseID in playlistResponseMap) {
                 var videoResponse = playlistResponseMap[playlistResponseID];
-                playlistItems.push(videoResponse.result.items[0]);
+                if (videoResponse.result.items[0] !== undefined)
+                    playlistItems.push(videoResponse.result.items[0]);
             }
 
             return playlistItems.sort(function(v1, v2) {
