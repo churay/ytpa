@@ -84,13 +84,28 @@
                 var playlistNames = playlistObjects.map(function() {
                     return $(this).text(); }).get();
 
-                ytpa.plot.playlists(playlistNames, playlistIDs);
+                ytpa.plot.playlists(playlistNames, playlistIDs, ytpaGetPlotOptions());
             });
+
+            $('#ytpa-statistic').change(function() { ytpa.plot.draw(ytpaGetPlotOptions()); });
+            $('#ytpa-graphtype').change(function() { ytpa.plot.draw(ytpaGetPlotOptions()); });
+            $('#ytpa-scale').change(function() { ytpa.plot.draw(ytpaGetPlotOptions()); });
 
             $('#ytpa-graph').height($('#ytpa-graph').width());
 
             resolve();
         });
+    }
+
+    /**
+     * Returns an object defining all of the options for drawing the visualization plot.
+     */
+    function ytpaGetPlotOptions() {
+        return {
+            data: $('#ytpa-statistic').val(),
+            repr: $('#ytpa-graphtype').val(),
+            scale: $('#ytpa-scale').val(),
+        };
     }
 
 }(window.ytpa = window.ytpa || {}, jQuery) );

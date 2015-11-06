@@ -10,10 +10,19 @@
 
     ytpa.plot = ytpa.plot || {};
 
+    /** An object containing all of the option enumerations for plotting. **/
+    ytpa.plot.opts = {};
+    /** An enumeration of all of the options for the data being displayed. **/
+    ytpa.plot.opts.data = Object.freeze({VIEWS: 0, LIKES: 1, LIKE_RATIO: 2, COMMENTS: 3});
+    /** An enumeration of all of the graph representation types. **/
+    ytpa.plot.opts.repr = Object.freeze({SERIES: 0, COLLECTION: 1});
+    /** An enumeration of all of the scale types that can be used for the graph. **/
+    ytpa.plot.opts.scale = Object.freeze({INDEX: 0, RATIO: 1});
+
     /**
      * Adds the playlist (given as a list of videos) to the graph visualization.
      */
-    ytpa.plot.playlists = function(playlistNames, playlistIDs) {
+    ytpa.plot.playlists = function(playlistNames, playlistIDs, plotOptions) {
         var genPlaylistRequest = function(plname, plid) {
             return ytpa.query.playlistvideos(plid).then(function(videos) {
                 return {id: plid, name: plname, videos: videos};
@@ -37,7 +46,7 @@
                 ytpaLoadedPlaylists[playlist.id] = playlist;
             }
 
-            ytpa.plot.draw();
+            ytpa.plot.draw(plotOptions);
         });
     };
 
@@ -52,7 +61,7 @@
     /**
      * Redraws the graph visualization with all of the playlist data given.
      */
-    ytpa.plot.draw = function() {
+    ytpa.plot.draw = function(plotOptions) {
         var chartData = new google.visualization.DataTable();
         chartData.addColumn('number', 'Video Number');
         for(var playlistID in ytpaPlottedPlaylists) {
