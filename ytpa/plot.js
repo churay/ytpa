@@ -62,40 +62,43 @@
      * Redraws the graph visualization with all of the playlist data given.
      */
     ytpa.plot.draw = function(plotOptions) {
-        var chartData = new google.visualization.DataTable();
-        chartData.addColumn('number', 'Video Number');
+        var playlistChartDataList = [];
+
         for(var playlistID in ytpaPlottedPlaylists) {
-            chartData.addColumn('number', ytpaLoadedPlaylists[playlistID].name);
-            chartData.addColumn({type: 'string', role: 'tooltip', p: {'html': true}});
-        }
+            var playlist = ytpaLoadedPlaylists[playlistID];
 
-        var maxPlaylistLength = Math.max.apply(Math, $.map(ytpaPlottedPlaylists,
-            function(plBool, plID) { return ytpaLoadedPlaylists[plID].videos.length }));
-        for(var videoIdx = 0; videoIdx < maxPlaylistLength; ++videoIdx ) {
-            var playlistVideoInfo = [videoIdx + 1];
-            for(var playlistID in ytpaPlottedPlaylists) {
-                var playlist = ytpaLoadedPlaylists[playlistID];
+            var playlistChartData = new google.visualization.DataTable();
+            playlistChartData.addColumn('number', 'Video Scaled Index');
+            playlistChartData.addColumn('number', playlist.name);
+            playlistChartData.addColumn({type: 'string', role: 'tooltip', p: {'html': true}});
 
-                var playlistVideoViews = null;
-                var playlistVideoTooltip = null;
-                if(videoIdx < playlist.videos.length) {
-                    var playlistVideo = playlist.videos[videoIdx];
-                    playlistVideoViews = parseInt(playlistVideo.statistics.viewCount);
-                    playlistVideoTooltip = ytpaGenerateTooltipHtml(playlistVideo, videoIdx + 1);
-                }
+            for(var videoID in playlist.videos) {
+                var videoIdx = parseInt(videoID);
+                var playlistVideo = playlist.videos[videoID];
 
-                playlistVideoInfo.push(playlistVideoViews);
-                playlistVideoInfo.push(playlistVideoTooltip);
+                var videoStatistic = parseInt(playlistVideo.statistics.viewCount);
+                var videoScaledIdx = ( plotOptions.scale == ytpa.plot.opts.scale.INDEX ) ?
+                    videoIdx : videoIdx / ( playlist.videos.length - 1 );
+                var videoTooltip = ytpaGenerateTooltipHtml(playlistVideo, videoIdx + 1);
+
+                playlistChartData.addRow([videoScaledIdx, videoStatistic, videoTooltip]);
             }
 
-            chartData.addRow(playlistVideoInfo);
+            playlistChartDataList.push(playlistChartData);
         }
+
+        var chartData = playlistChartDataList.pop();
+        for(var playlistIdx in playlistChartDataList)
+            chartData = google.visualization.data.join(chartData,
+                playlistChartDataList[playlistIdx], 'full', [[0, 0]],
+                ytpa.lib.range(1, chartData.getNumberOfColumns()), [1, 2]);
 
         var chartOptions = {
             title: `Playlist Comparison for the "${$("#ytpa-channel").val()}" Channel`,
-            tooltip: {isHtml: true},
             hAxis: {title: 'Video Number'},
             vAxis: {title: 'View Count'},
+            tooltip: {isHtml: true},
+            interpolateNulls: plotOptions.scale == ytpa.plot.opts.scale.RATIO,
         };
 
         var chart = new google.visualization.LineChart(document.getElementById('ytpa-graph'));
