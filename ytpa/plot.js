@@ -76,15 +76,24 @@
             for(var playlistID in ytpaPlottedPlaylists) {
                 var playlist = ytpaLoadedPlaylists[playlistID];
 
-                var playlistVideoViews = null;
+                var playlistVideoData = null;
                 var playlistVideoTooltip = null;
                 if(videoIdx < playlist.videos.length) {
                     var playlistVideo = playlist.videos[videoIdx];
-                    playlistVideoViews = parseInt(playlistVideo.statistics.viewCount);
+
+                    if(plotOptions.data == ytpa.plot.opts.data.VIEWS)
+                        playlistVideoData = parseInt(playlistVideo.statistics.viewCount);
+                    else if(plotOptions.data == ytpa.plot.opts.data.LIKES)
+                        playlistVideoData = parseInt(playlistVideo.statistics.likeCount);
+                    else if(plotOptions.data == ytpa.plot.opts.data.LIKE_RATIO)
+                        playlistVideoData = parseInt(playlistVideo.statistics.dislikeCount);
+                    else if(plotOptions.data == ytpa.plot.opts.data.COMMENTS)
+                        playlistVideoData = parseInt(playlistVideo.statistics.commentCount);
+
                     playlistVideoTooltip = ytpaGenerateTooltipHtml(playlistVideo, videoIdx + 1);
                 }
 
-                playlistVideoInfo.push(playlistVideoViews);
+                playlistVideoInfo.push(playlistVideoData);
                 playlistVideoInfo.push(playlistVideoTooltip);
             }
 
