@@ -13,7 +13,7 @@
     /** An object containing all of the option enumerations for plotting. **/
     ytpa.plot.opts = {};
     /** An enumeration of all of the options for the data being displayed. **/
-    ytpa.plot.opts.data = Object.freeze({VIEWS: 0, LIKES: 1, LIKE_RATIO: 2, COMMENTS: 3});
+    ytpa.plot.opts.data = Object.freeze({VIEWS: 0, LIKES: 1, LIKE_RATIO: 2, COMMENTS: 3, AGG_VIEWS: 4});
     /** An enumeration of all of the graph representation types. **/
     ytpa.plot.opts.repr = Object.freeze({SERIES: 0, COLLECTION: 1});
     /** An enumeration of all of the scale types that can be used for the graph. **/
@@ -71,15 +71,19 @@
 
         var maxPlaylistLength = Math.max.apply(Math, $.map(ytpaPlottedPlaylists,
             function(plBool, plID) { return ytpaLoadedPlaylists[plID].videos.length }));
+        var agg_views = 0;
         for(var videoIdx = 0; videoIdx < maxPlaylistLength; ++videoIdx ) {
             var playlistVideoInfo = [videoIdx + 1];
+            
             for(var playlistID in ytpaPlottedPlaylists) {
                 var playlist = ytpaLoadedPlaylists[playlistID];
 
                 var playlistVideoData = null;
                 var playlistVideoTooltip = null;
+                
                 if(videoIdx < playlist.videos.length) {
-                    var playlistVideo = playlist.videos[videoIdx];
+                    var playlistVideo = playlist.videos[videoIdx];        
+                    agg_views = agg_views + parseInt(playlistVideo.statistics.viewCount);
 
                     if(plotOptions.data == ytpa.plot.opts.data.VIEWS)
                         playlistVideoData = parseInt(playlistVideo.statistics.viewCount);
@@ -89,6 +93,8 @@
                         playlistVideoData = parseInt(playlistVideo.statistics.dislikeCount);
                     else if(plotOptions.data == ytpa.plot.opts.data.COMMENTS)
                         playlistVideoData = parseInt(playlistVideo.statistics.commentCount);
+                    else if(plotOptions.data == ytpa.plot.opts.data.AGG_VIEWS)
+                        playlistVideoData = parseInt(agg_views);
 
                     playlistVideoTooltip = ytpaGenerateTooltipHtml(playlistVideo, videoIdx + 1);
                 }
