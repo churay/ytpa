@@ -49,6 +49,8 @@
      */
     function ytpaDocumentInit() {
         return new Promise(function(resolve) {
+            $('.selectpicker').selectpicker();
+
             $('#ytpa-channel-submit').click(function(){
                 ytpa.plot.clear();
 
@@ -66,10 +68,13 @@
                                 var playlistElement = document.createElement('option');
 
                                 playlistElement.setAttribute('value', playlist.id);
+                                playlistElement.setAttribute('class', 'ytpa-select-option');
                                 playlistElement.innerHTML = playlist.snippet.title;
                                 playlistOptions.append(playlistElement);
                             }
                         }
+
+                        playlistOptions.selectpicker('refresh');
                     });
                 } catch(error) {
                     console.log('Invalid channel name!');
