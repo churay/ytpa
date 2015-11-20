@@ -13,7 +13,7 @@
     /** An object containing all of the option enumerations for plotting. **/
     ytpa.plot.opts = {};
     /** An enumeration of all of the options for the data being displayed. **/
-    ytpa.plot.opts.data = Object.freeze({VIEWS: 0, AGG_VIEWS: 1, LIKES: 2, LIKE_RATIO: 3, COMMENTS: 4});
+    ytpa.plot.opts.data = Object.freeze({VIEWS: 0, LIKES: 1, LIKE_RATIO: 2, COMMENTS: 3, AGG_VIEWS: 4});
     /** An enumeration of all of the graph representation types. **/
     ytpa.plot.opts.repr = Object.freeze({SERIES: 0, COLLECTION: 1});
     /** An enumeration of all of the scale types that can be used for the graph. **/
@@ -62,52 +62,56 @@
      * Redraws the graph visualization with all of the playlist data given.
      */
     ytpa.plot.draw = function(plotOptions) {
-        var playlistChartDataList = [];
-
+        var chartData = new google.visualization.DataTable();
+        chartData.addColumn('number', 'Video Number');
         for(var playlistID in ytpaPlottedPlaylists) {
-            var playlist = ytpaLoadedPlaylists[playlistID];
-            var playlistLength = playlist.videos.length;
-
-            var playlistChartData = new google.visualization.DataTable();
-            playlistChartData.addColumn('number', 'Video Scaled Index');
-            playlistChartData.addColumn('number', playlist.name);
-            playlistChartData.addColumn({type: 'string', role: 'tooltip', p: {'html': true}});
-
-            for(var videoID in playlist.videos) {
-                var videoIdx = parseInt(videoID);
-                var playlistVideo = playlist.videos[videoID];
-
-                // TODO(JRC): Move this code to a location that's closer to the
-                // acquisition of this data.
-                if(playlistVideo.statistics.aggViewCount === undefined) {
-                    var prevAggViewCount = (videoIdx === 0) ? 0 :
-                        playlist.videos[(videoIdx-1).toString()].statistics.aggViewCount;
-                    playlistVideo.statistics.aggViewCount = prevAggViewCount +
-                        parseInt(playlistVideo.statistics.viewCount);
-                }
-
-                playlistChartData.addRow([
-                    ytpaGetVideoIndex(videoIdx, playlistLength, plotOptions.scale),
-                    ytpaGetVideoStatistic(playlistVideo, plotOptions.data),
-                    ytpaGenerateTooltipHtml(playlistVideo, videoIdx + 1),
-                ]);
-            }
-
-            playlistChartDataList.push(playlistChartData);
+            chartData.addColumn('number', ytpaLoadedPlaylists[playlistID].name);
+            chartData.addColumn({type: 'string', role: 'tooltip', p: {'html': true}});
         }
 
-        var chartData = playlistChartDataList.pop();
-        for(var playlistIdx in playlistChartDataList)
-            chartData = google.visualization.data.join(chartData,
-                playlistChartDataList[playlistIdx], 'full', [[0, 0]],
-                ytpa.lib.range(1, chartData.getNumberOfColumns()), [1, 2]);
+        var maxPlaylistLength = Math.max.apply(Math, $.map(ytpaPlottedPlaylists,
+            function(plBool, plID) { return ytpaLoadedPlaylists[plID].videos.length }));
+        var agg_views = 0;
+        for(var videoIdx = 0; videoIdx < maxPlaylistLength; ++videoIdx ) {
+            var playlistVideoInfo = [videoIdx + 1];
+            
+            for(var playlistID in ytpaPlottedPlaylists) {
+                var playlist = ytpaLoadedPlaylists[playlistID];
+
+                var playlistVideoData = null;
+                var playlistVideoTooltip = null;
+                
+                if(videoIdx < playlist.videos.length) {
+                    var playlistVideo = playlist.videos[videoIdx];        
+                    agg_views = agg_views + parseInt(playlistVideo.statistics.viewCount);
+                    var statObj = {};
+
+                    if(plotOptions.data == ytpa.plot.opts.data.VIEWS)
+                        statObj = {Type: "View Count", Stat: parseInt(playlistVideo.statistics.viewCount)};
+                    else if(plotOptions.data == ytpa.plot.opts.data.LIKES)
+                        statObj = {Type: "Like Count", Stat: parseInt(playlistVideo.statistics.likeCount)};
+                    else if(plotOptions.data == ytpa.plot.opts.data.LIKE_RATIO)
+                        statObj = {Type: "Dislike Count", Stat: parseInt(playlistVideo.statistics.dislikeCount)};
+                    else if(plotOptions.data == ytpa.plot.opts.data.COMMENTS)
+                        statObj = {Type: "Comment Count", Stat: parseInt(playlistVideo.statistics.commentCount)};
+                    else if(plotOptions.data == ytpa.plot.opts.data.AGG_VIEWS)
+                        statObj = {Type: "Aggregate Views", Stat: parseInt(agg_views)};
+
+                    playlistVideoTooltip = ytpaGenerateTooltipHtml(playlistVideo, videoIdx + 1, statObj);
+                }
+
+                playlistVideoInfo.push(statObj.Stat);
+                playlistVideoInfo.push(playlistVideoTooltip);
+            }
+
+            chartData.addRow(playlistVideoInfo);
+        }
 
         var chartOptions = {
             title: `Playlist Comparison for the "${$("#ytpa-channel").val()}" Channel`,
+            tooltip: {isHtml: true},
             hAxis: {title: 'Video Number'},
             vAxis: {title: 'View Count'},
-            tooltip: {isHtml: true},
-            interpolateNulls: plotOptions.scale == ytpa.plot.opts.scale.RATIO,
         };
 
         var chart = new google.visualization.LineChart(document.getElementById('ytpa-graph'));
@@ -117,46 +121,12 @@
     /// Private Members ///
 
     /**
-     * Generates and returns the video statistic for the given video given the
-     * video information and the statistic option that will be applied.
-     */
-    function ytpaGetVideoStatistic(video, dataOpt) {
-        if(dataOpt == ytpa.plot.opts.data.VIEWS) {
-            return parseInt(video.statistics.viewCount);
-        } else if(dataOpt == ytpa.plot.opts.data.AGG_VIEWS) {
-            return parseInt(video.statistics.aggViewCount);
-        } else if(dataOpt == ytpa.plot.opts.data.LIKES) {
-            return parseInt(video.statistics.likeCount);
-        } else if(dataOpt == ytpa.plot.opts.data.LIKE_RATIO) {
-            return parseInt(video.statistics.dislikeCount);
-        } else if(dataOpt == ytpa.plot.opts.data.COMMENTS) {
-            return parseInt(video.statistics.commentCount);
-        } else {
-            throw new RangeError("Given video statistic option is invalid.");
-        }
-    }
-
-    /**
-     * Generates and returns the video index for the given video given the
-     * video information and the scaling option that will be applied.
-     */
-    function ytpaGetVideoIndex(videoIndex, videoPlaylistLength, scaleOpt) {
-        if(scaleOpt == ytpa.plot.opts.scale.INDEX) {
-            return videoIndex;
-        } else if(scaleOpt == ytpa.plot.opts.scale.RATIO) {
-            return videoIndex / ( videoPlaylistLength - 1 );
-        } else {
-            throw new RangeError("Given scaling option is invalid.");
-        }
-    }
-
-    /**
      * Generates and returns the HTML for given video's tooltip.
      */
-    function ytpaGenerateTooltipHtml(video, videoIdx) {
+    function ytpaGenerateTooltipHtml(video, videoIdx, statObj) {
         return `<div class="ytpa-video-tooltip"><p>
             <b>Part ${videoIdx}</b>: ${video.snippet.title}<br>
-            <b>Views</b>: ${video.statistics.viewCount}<br>
+            <b>${statObj.Type}</b>: ${statObj.Stat}<br>
         </p></div>`;
     }
 
