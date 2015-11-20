@@ -13,11 +13,16 @@
     /** An object containing all of the option enumerations for plotting. **/
     ytpa.plot.opts = {};
     /** An enumeration of all of the options for the data being displayed. **/
-    ytpa.plot.opts.data = Object.freeze({VIEWS: 0, AGG_VIEWS: 1, LIKES: 2, LIKE_RATIO: 3, COMMENTS: 4});
+    ytpa.plot.opts.data = Object.freeze({VIEWS: 0, AGG_VIEWS: 1, LIKES: 2, LIKE_RATIO: 3, COMMENTS: 4,
+        props: {0: {name: 'Views', value: 0}, 1: {name: 'Aggregate Views', value: 1},
+        2: {name: 'Likes/Dislikes', value: 2}, 3: {name: 'Like/Dislike Ratio', value: 3},
+        4: {name: 'Comments', value: 4}}});
     /** An enumeration of all of the graph representation types. **/
-    ytpa.plot.opts.repr = Object.freeze({SERIES: 0, COLLECTION: 1});
+    ytpa.plot.opts.repr = Object.freeze({SERIES: 0, COLLECTION: 1,
+        props: {0: {name: 'Series', value: 0}, 1: {name: 'Collection', value: 1}}});
     /** An enumeration of all of the scale types that can be used for the graph. **/
-    ytpa.plot.opts.scale = Object.freeze({INDEX: 0, RATIO: 1});
+    ytpa.plot.opts.scale = Object.freeze({INDEX: 0, RATIO: 1,
+        props: {0: {name: 'Index', value: 0}, 1: {name: 'Ratio', value: 1}}});
 
     /**
      * Adds the playlist (given as a list of videos) to the graph visualization.
@@ -86,12 +91,10 @@
                         parseInt(playlistVideo.statistics.viewCount);
                 }
 
-
-                var statObj = ytpaGetVideoStatistic(playlistVideo, plotOptions.data);
                 playlistChartData.addRow([
                     ytpaGetVideoIndex(videoIdx, playlistLength, plotOptions.scale),
-                    statObj.Stat,
-                    ytpaGenerateTooltipHtml(playlistVideo, videoIdx + 1, statObj),
+                    ytpaGetVideoStatistic(playlistVideo, plotOptions.data),
+                    ytpaGenerateTooltipHtml(playlistVideo, videoIdx + 1, plotOptions.data),
                 ]);
             }
 
@@ -106,8 +109,8 @@
 
         var chartOptions = {
             title: `Playlist Comparison for the "${$("#ytpa-channel").val()}" Channel`,
-            hAxis: {title: 'Video Number'},
-            vAxis: {title: 'View Count'},
+            hAxis: {title: `Playlist ${ytpa.plot.opts.scale.props[plotOptions.scale].name}`},
+            vAxis: {title: `${ytpa.plot.opts.data.props[plotOptions.data].name}`},
             tooltip: {isHtml: true},
             interpolateNulls: plotOptions.scale == ytpa.plot.opts.scale.RATIO,
         };
@@ -124,15 +127,15 @@
      */
     function ytpaGetVideoStatistic(video, dataOpt) {
         if(dataOpt == ytpa.plot.opts.data.VIEWS) {
-            return {Type: "View Count", Stat: parseInt(video.statistics.viewCount)};
+            return parseInt(video.statistics.viewCount);
         } else if(dataOpt == ytpa.plot.opts.data.AGG_VIEWS) {
-            return {Type: "Aggregate Views", Stat: parseInt(video.statistics.aggViewCount)};
+            return parseInt(video.statistics.aggViewCount);
         } else if(dataOpt == ytpa.plot.opts.data.LIKES) {
-            return {Type: "Like Count", Stat: parseInt(video.statistics.likeCount)};
+            return parseInt(video.statistics.likeCount);
         } else if(dataOpt == ytpa.plot.opts.data.LIKE_RATIO) {
-            return {Type: "Dislike Count", Stat: parseInt(video.statistics.dislikeCount)};
+            return parseInt(video.statistics.dislikeCount);
         } else if(dataOpt == ytpa.plot.opts.data.COMMENTS) {
-            return {Type: "Comment Count", Stat: parseInt(video.statistics.commentCount)};
+            return parseInt(video.statistics.commentCount);
         } else {
             throw new RangeError("Given video statistic option is invalid.");
         }
@@ -155,10 +158,11 @@
     /**
      * Generates and returns the HTML for given video's tooltip.
      */
-    function ytpaGenerateTooltipHtml(video, videoIdx, statObj) {
+    function ytpaGenerateTooltipHtml(video, videoIdx, dataOpt) {
         return `<div class="ytpa-video-tooltip"><p>
             <b>Part ${videoIdx}</b>: ${video.snippet.title}<br>
-            <b>${statObj.Type}</b>: ${statObj.Stat}<br>
+            <b>${ytpa.plot.opts.data.props[dataOpt].name}</b>:
+            ${ytpaGetVideoStatistic(video, dataOpt)}<br>
         </p></div>`;
     }
 
