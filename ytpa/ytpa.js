@@ -56,9 +56,12 @@
 
                 var channelName = $('#ytpa-channel').val();
                 try {
-                    ytpa.query.playlists(channelName, 50).then(function(playlists) {
-                        var playlistOptions = $('#ytpa-playlist');
+                    ytpa.query.playlists(channelName).then(function(playlists) {
+                        playlists.sort(function(p1, p2) {
+                            return (p1.snippet.title > p2.snippet.title) ? 1 : -1;
+                        });
 
+                        var playlistOptions = $('#ytpa-playlist');
                         if(channelName !== playlistOptions.attr('data-playlist')) {
                             playlistOptions.empty();
                             playlistOptions.attr('data-playlist', channelName);

@@ -143,7 +143,7 @@
 
             return playlistItems.sort(function(v1, v2) {
                 return (v1.snippet.publishedAt > v2.snippet.publishedAt) ? 1 : -1;
-            });;
+            });
         });
     };
 
