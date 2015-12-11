@@ -44,6 +44,37 @@
         });
     }
 
+
+    function searchChannel() {
+        ytpa.plot.clear();
+
+        var channelName = $('#ytpa-channel').val();
+        try {
+            ytpa.query.playlists(channelName, 50).then(function(playlists) {
+                var playlistOptions = $('#ytpa-playlist');
+
+                if(channelName !== playlistOptions.attr('data-playlist')) {
+                    playlistOptions.empty();
+                    playlistOptions.attr('data-playlist', channelName);
+
+                    for(var playlistIdx in playlists) {
+                        var playlist = playlists[playlistIdx];
+                        var playlistElement = document.createElement('option');
+
+                        playlistElement.setAttribute('value', playlist.id);
+                        playlistElement.setAttribute('class', 'ytpa-select-option');
+                        playlistElement.innerHTML = playlist.snippet.title;
+                        playlistOptions.append(playlistElement);
+                    }
+                }
+
+                playlistOptions.selectpicker('refresh');
+            });
+        } catch(error) {
+            console.log('Invalid channel name!');
+        }
+    }
+
     /**
      * Returns a promise that yields true when the application page is initialized.
      */
@@ -52,33 +83,12 @@
             $('.selectpicker').selectpicker();
 
             $('#ytpa-channel-submit').click(function(){
-                ytpa.plot.clear();
+                searchChannel();
+            });
 
-                var channelName = $('#ytpa-channel').val();
-                try {
-                    ytpa.query.playlists(channelName, 50).then(function(playlists) {
-                        var playlistOptions = $('#ytpa-playlist');
-
-                        if(channelName !== playlistOptions.attr('data-playlist')) {
-                            playlistOptions.empty();
-                            playlistOptions.attr('data-playlist', channelName);
-
-                            for(var playlistIdx in playlists) {
-                                var playlist = playlists[playlistIdx];
-                                var playlistElement = document.createElement('option');
-
-                                playlistElement.setAttribute('value', playlist.id);
-                                playlistElement.setAttribute('class', 'ytpa-select-option');
-                                playlistElement.innerHTML = playlist.snippet.title;
-                                playlistOptions.append(playlistElement);
-                            }
-                        }
-
-                        playlistOptions.selectpicker('refresh');
-                    });
-                } catch(error) {
-                    console.log('Invalid channel name!');
-                }
+            $('#ytpa-channel').keypress(function(e) {
+                if (e.which == 13)
+                    searchChannel();
             });
 
             $('#ytpa-playlist').change(function() {
@@ -97,6 +107,10 @@
             $('#ytpa-scale').change(function() { ytpa.plot.draw(ytpaGetPlotOptions()); });
 
             $('#ytpa-graph').height($('#ytpa-graph').width());
+
+            $('myform').submit(function() {
+                return false;
+            });
 
             resolve();
         });
