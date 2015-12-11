@@ -101,7 +101,8 @@
             playlistChartDataList.push(playlistChartData);
         }
 
-        var chartData = playlistChartDataList.pop();
+        var chartData = (playlistChartDataList.length > 0) ? playlistChartDataList.pop() :
+            google.visualization.arrayToDataTable([['', {role: 'annotation'}], ['', '']]);
         for(var playlistIdx in playlistChartDataList)
             chartData = google.visualization.data.join(chartData,
                 playlistChartDataList[playlistIdx], 'full', [[0, 0]],

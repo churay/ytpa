@@ -101,6 +101,8 @@
 
             $('#ytpa-graph').height($('#ytpa-graph').width());
 
+            ytpa.plot.draw(ytpaGetPlotOptions());
+
             resolve();
         });
     }
