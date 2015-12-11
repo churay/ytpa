@@ -20,6 +20,5 @@
 
 #ytpa-playlist + div li > a > span:first-child {
     text-overflow: ellipsis;
-    overflow-x: hidden;
     width: 100%;
 }
