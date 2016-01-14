@@ -103,6 +103,7 @@
 
                         playlistElement.setAttribute('value', playlist.id);
                         playlistElement.setAttribute('class', 'ytpa-select-option');
+                        playlistElement.setAttribute('title', playlist.snippet.title);
                         playlistElement.innerHTML = playlist.snippet.title;
                         playlistOptions.append(playlistElement);
                     }
