@@ -13,10 +13,12 @@
     /** An object containing all of the option enumerations for plotting. **/
     ytpa.plot.opts = {};
     /** An enumeration of all of the options for the data being displayed. **/
-    ytpa.plot.opts.data = Object.freeze({VIEWS: 0, AGG_VIEWS: 1, LIKES: 2, LIKE_RATIO: 3, COMMENTS: 4,
+    ytpa.plot.opts.data = Object.freeze({VIEWS: 0, AGG_VIEWS: 1, LIKE_RATIO: 2,
+        LIKES_NORM: 3, DISLIKES_NORM: 4, COMMENTS_NORM: 5, PARTICIPATION_NORM: 6,
         props: {0: {name: 'Views', value: 0}, 1: {name: 'Aggregate Views', value: 1},
-        2: {name: 'Likes/Dislikes', value: 2}, 3: {name: 'Like/Dislike Ratio', value: 3},
-        4: {name: 'Comments', value: 4}}});
+        2: {name: 'Likes/Dislike Ratio', value: 2}, 3: {name: 'View-Normalized Likes', value: 3},
+        4: {name: 'View-Normalized Dislikes', value: 4}, 5: {name: 'View-Normalized Comments', value: 5},
+        6: {name: 'View-Normalized Participation', value: 6},}});
     /** An enumeration of all of the graph representation types. **/
     ytpa.plot.opts.repr = Object.freeze({SERIES: 0, COLLECTION: 1,
         props: {0: {name: 'Series', value: 0}, 1: {name: 'Collection', value: 1}}});
@@ -127,16 +129,26 @@
      * video information and the statistic option that will be applied.
      */
     function ytpaGetVideoStatistic(video, dataOpt) {
+        var viewCount = parseInt(video.statistics.viewCount);
+        var aggViewCount = parseInt(video.statistics.aggViewCount);
+        var likeCount = parseInt(video.statistics.likeCount);
+        var dislikeCount = parseInt(video.statistics.dislikeCount);
+        var commentCount = parseInt(video.statistics.commentCount);
+
         if(dataOpt == ytpa.plot.opts.data.VIEWS) {
-            return parseInt(video.statistics.viewCount);
+            return viewCount;
         } else if(dataOpt == ytpa.plot.opts.data.AGG_VIEWS) {
-            return parseInt(video.statistics.aggViewCount);
-        } else if(dataOpt == ytpa.plot.opts.data.LIKES) {
-            return parseInt(video.statistics.likeCount);
+            return aggViewCount;
         } else if(dataOpt == ytpa.plot.opts.data.LIKE_RATIO) {
-            return parseInt(video.statistics.dislikeCount);
-        } else if(dataOpt == ytpa.plot.opts.data.COMMENTS) {
-            return parseInt(video.statistics.commentCount);
+            return likeCount / (likeCount + dislikeCount);
+        } else if(dataOpt == ytpa.plot.opts.data.LIKES_NORM) {
+            return likeCount / viewCount;
+        } else if(dataOpt == ytpa.plot.opts.data.DISLIKES_NORM) {
+            return dislikeCount / viewCount;
+        } else if(dataOpt == ytpa.plot.opts.data.COMMENTS_NORM) {
+            return commentCount / viewCount;
+        } else if(dataOpt == ytpa.plot.opts.data.PARTICIPATION_NORM) {
+            return (commentCount + likeCount + dislikeCount) / viewCount;
         } else {
             throw new RangeError("Given video statistic option is invalid.");
         }
