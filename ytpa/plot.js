@@ -13,12 +13,11 @@
     /** An object containing all of the option enumerations for plotting. **/
     ytpa.plot.opts = {};
     /** An enumeration of all of the options for the data being displayed. **/
-    ytpa.plot.opts.data = Object.freeze({VIEWS: 0, AGG_VIEWS: 1, LIKE_RATIO: 2,
-        LIKES_NORM: 3, DISLIKES_NORM: 4, COMMENTS_NORM: 5, PARTICIPATION_NORM: 6,
-        props: {0: {name: 'Views', value: 0}, 1: {name: 'Aggregate Views', value: 1},
-        2: {name: 'Likes/Dislike Ratio', value: 2}, 3: {name: 'View-Normalized Likes', value: 3},
-        4: {name: 'View-Normalized Dislikes', value: 4}, 5: {name: 'View-Normalized Comments', value: 5},
-        6: {name: 'View-Normalized Participation', value: 6},}});
+    ytpa.plot.opts.data = Object.freeze({VIEWS: 0, LIKE_RATIO: 1, LIKES_NORM: 2,
+        DISLIKES_NORM: 3, COMMENTS_NORM: 4, PARTICIPATION_NORM: 5,
+        props: {0: {name: 'Views', value: 0}, 1: {name: 'Likes/Dislike Ratio', value: 1},
+        2: {name: 'View-Normalized Likes', value: 2}, 3: {name: 'View-Normalized Dislikes', value: 3},
+        4: {name: 'View-Normalized Comments', value: 4}, 5: {name: 'View-Normalized Participation', value: 5}}});
     /** An enumeration of all of the graph representation types. **/
     ytpa.plot.opts.repr = Object.freeze({SERIES: 0, COLLECTION: 1,
         props: {0: {name: 'Series', value: 0}, 1: {name: 'Collection', value: 1}}});
@@ -69,29 +68,22 @@
      * Redraws the graph visualization with all of the playlist data given.
      */
     ytpa.plot.draw = function(plotOptions) {
-        var playlistChartDataList = [];
+        var playlistSort = ytpaGetPlaylistSortFunction(plotOptions.data, plotOptions.repr);
 
+        var playlistChartDataList = [];
         for(var playlistID in ytpaPlottedPlaylists) {
             var playlist = ytpaLoadedPlaylists[playlistID];
             var playlistLength = playlist.videos.length;
+            var playlistVideos = playlist.videos.sort(playlistSort);
 
             var playlistChartData = new google.visualization.DataTable();
             playlistChartData.addColumn('number', 'Video Scaled Index');
             playlistChartData.addColumn('number', playlist.name);
             playlistChartData.addColumn({type: 'string', role: 'tooltip', p: {'html': true}});
 
-            for(var videoID in playlist.videos) {
-                var videoIdx = parseInt(videoID);
-                var playlistVideo = playlist.videos[videoID];
-
-                // TODO(JRC): Move this code to a location that's closer to the
-                // acquisition of this data.
-                if(playlistVideo.statistics.aggViewCount === undefined) {
-                    var prevAggViewCount = (videoIdx === 0) ? 0 :
-                        playlist.videos[(videoIdx-1).toString()].statistics.aggViewCount;
-                    playlistVideo.statistics.aggViewCount = prevAggViewCount +
-                        parseInt(playlistVideo.statistics.viewCount);
-                }
+            for(var videoIdx in playlistVideos) {
+                var videoIdx = parseInt(videoIdx);
+                var playlistVideo = playlist.videos[videoIdx];
 
                 playlistChartData.addRow([
                     ytpaGetVideoIndex(videoIdx, playlistLength, plotOptions.scale),
@@ -118,11 +110,31 @@
             interpolateNulls: plotOptions.scale == ytpa.plot.opts.scale.RATIO,
         };
 
-        var chart = new google.visualization.LineChart(document.getElementById('ytpa-graph'));
+        var chartType = (plotOptions.repr == ytpa.plot.opts.repr.SERIES) ?
+            google.visualization.LineChart : google.visualization.ColumnChart;
+        var chart = new chartType(document.getElementById('ytpa-graph'));
         chart.draw(chartData, chartOptions);
     };
 
     /// Private Members ///
+
+    /**
+     * Generates and returns the function that sorts the a playlist's videos
+     * for the given representation option.
+     */
+    function ytpaGetPlaylistSortFunction(dataOpt, reprOpt) {
+        if(reprOpt == ytpa.plot.opts.repr.SERIES) {
+            return function(v1, v2) {
+                return (v1.snippet.publishedAt > v2.snippet.publishedAt) ? 1 : -1;
+            };
+        } else if(reprOpt == ytpa.plot.opts.repr.COLLECTION) {
+            return function(v1, v2) {
+                return ytpaGetVideoStatistic(v2, dataOpt) - ytpaGetVideoStatistic(v1, dataOpt);
+            };
+        } else {
+            throw new RangeError("Given playlist representation option is invalid.");
+        }
+    }
 
     /**
      * Generates and returns the video statistic for the given video given the

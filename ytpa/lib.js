@@ -24,7 +24,7 @@
      * @see http://stackoverflow.com/a/3895618
      */
     ytpa.lib.range = function(start, end, step) {
-        var step = (step!== undefined) ? step : 1;
+        var step = (step !== undefined) ? step : 1;
 
         var rangeArray = [];
         var currValue = start;
