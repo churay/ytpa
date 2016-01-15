@@ -96,7 +96,7 @@
                 playlistChartData.addRow([
                     ytpaGetVideoIndex(videoIdx, playlistLength, plotOptions.scale),
                     ytpaGetVideoStatistic(playlistVideo, plotOptions.data),
-                    ytpaGenerateTooltipHtml(playlistVideo, videoIdx + 1, plotOptions.data),
+                    ytpaGenerateTooltipHtml(playlistVideo, videoIdx, plotOptions.data),
                 ]);
             }
 
@@ -112,7 +112,7 @@
 
         var chartOptions = {
             title: `Playlist Comparison for the "${$("#ytpa-channel").val()}" Channel`,
-            hAxis: {title: `Playlist ${ytpa.plot.opts.scale.props[plotOptions.scale].name}`},
+            hAxis: {minValue: 1, title: `Playlist ${ytpa.plot.opts.scale.props[plotOptions.scale].name}`},
             vAxis: {title: `${ytpa.plot.opts.data.props[plotOptions.data].name}`},
             tooltip: {isHtml: true},
             interpolateNulls: plotOptions.scale == ytpa.plot.opts.scale.RATIO,
@@ -160,7 +160,7 @@
      */
     function ytpaGetVideoIndex(videoIndex, videoPlaylistLength, scaleOpt) {
         if(scaleOpt == ytpa.plot.opts.scale.INDEX) {
-            return videoIndex;
+            return videoIndex + 1;
         } else if(scaleOpt == ytpa.plot.opts.scale.RATIO) {
             return videoIndex / ( videoPlaylistLength - 1 );
         } else {
@@ -173,7 +173,7 @@
      */
     function ytpaGenerateTooltipHtml(video, videoIdx, dataOpt) {
         return `<div class="ytpa-video-tooltip"><p>
-            <b>Part ${videoIdx}</b>: ${video.snippet.title}<br>
+            <b>Part ${videoIdx + 1}</b>: ${video.snippet.title}<br>
             <b>${ytpa.plot.opts.data.props[dataOpt].name}</b>:
             ${ytpaGetVideoStatistic(video, dataOpt)}<br>
         </p></div>`;
