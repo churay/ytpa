@@ -104,8 +104,16 @@
 
         var chartOptions = {
             title: `Playlist Comparison for the "${$("#ytpa-channel").val()}" Channel`,
-            hAxis: {minValue: 1, title: `Playlist ${ytpa.plot.opts.scale.props[plotOptions.scale].name}`},
-            vAxis: {title: `${ytpa.plot.opts.data.props[plotOptions.data].name}`},
+            hAxis: {
+                title: `Playlist ${ytpa.plot.opts.scale.props[plotOptions.scale].name}`,
+                baselineColor: '#000000',
+                minValue: 1,
+            },
+            vAxis: {
+                title: `${ytpa.plot.opts.data.props[plotOptions.data].name}`,
+                baselineColor: '#000000',
+            },
+            explorer: {axis: 'horizontal', maxZoomOut: 1, keepInBounds: true},
             tooltip: {isHtml: true},
             interpolateNulls: plotOptions.scale == ytpa.plot.opts.scale.RATIO,
         };
