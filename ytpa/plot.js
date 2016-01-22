@@ -19,8 +19,9 @@
         2: {name: 'View-Normalized Likes', value: 2}, 3: {name: 'View-Normalized Dislikes', value: 3},
         4: {name: 'View-Normalized Comments', value: 4}, 5: {name: 'View-Normalized Participation', value: 5}}});
     /** An enumeration of all of the graph representation types. **/
-    ytpa.plot.opts.repr = Object.freeze({SERIES: 0, COLLECTION: 1,
-        props: {0: {name: 'Series', value: 0}, 1: {name: 'Collection', value: 1}}});
+    ytpa.plot.opts.repr = Object.freeze({SERIES: 0, COLLECTION: 1, AGGREGATE: 2, AVERAGE: 3,
+        props: {0: {name: 'Series', value: 0}, 1: {name: 'Collection', value: 1},
+        2: {name: 'Aggregate', value: 2}, 3: {name: 'Average', value: 3}}});
     /** An enumeration of all of the scale types that can be used for the graph. **/
     ytpa.plot.opts.scale = Object.freeze({INDEX: 0, RATIO: 1,
         props: {0: {name: 'Index', value: 0}, 1: {name: 'Ratio', value: 1}}});
@@ -68,7 +69,7 @@
      * Redraws the graph visualization with all of the playlist data given.
      */
     ytpa.plot.draw = function(plotOptions) {
-        var playlistSort = ytpaGetPlaylistSortFunction(plotOptions.data, plotOptions.repr);
+        var playlistSort = ytpaGetPlaylistSortFunction(plotOptions);
 
         var playlistChartDataList = [];
         for(var playlistID in ytpaPlottedPlaylists) {
@@ -86,9 +87,9 @@
                 var playlistVideo = playlist.videos[videoIdx];
 
                 playlistChartData.addRow([
-                    ytpaGetVideoIndex(videoIdx, playlistLength, plotOptions.scale),
-                    ytpaGetVideoStatistic(playlistVideo, plotOptions.data),
-                    ytpaGenerateTooltipHtml(playlistVideo, videoIdx, plotOptions.data),
+                    ytpaGetVideoIndex(videoIdx, playlistLength, plotOptions),
+                    ytpaGetVideoStatistic(playlistVideo, plotOptions),
+                    ytpaGenerateTooltipHtml(playlistVideo, videoIdx, plotOptions),
                 ]);
             }
 
@@ -130,14 +131,14 @@
      * Generates and returns the function that sorts the a playlist's videos
      * for the given representation option.
      */
-    function ytpaGetPlaylistSortFunction(dataOpt, reprOpt) {
-        if(reprOpt == ytpa.plot.opts.repr.SERIES) {
+    function ytpaGetPlaylistSortFunction(plotOptions) {
+        if(plotOptions.repr == ytpa.plot.opts.repr.SERIES) {
             return function(v1, v2) {
                 return (v1.snippet.publishedAt > v2.snippet.publishedAt) ? 1 : -1;
             };
-        } else if(reprOpt == ytpa.plot.opts.repr.COLLECTION) {
+        } else if(plotOptions.repr == ytpa.plot.opts.repr.COLLECTION) {
             return function(v1, v2) {
-                return ytpaGetVideoStatistic(v2, dataOpt) - ytpaGetVideoStatistic(v1, dataOpt);
+                return ytpaGetVideoStatistic(v2, plotOptions) - ytpaGetVideoStatistic(v1, plotOptions);
             };
         } else {
             throw new RangeError("Given playlist representation option is invalid.");
@@ -148,26 +149,23 @@
      * Generates and returns the video statistic for the given video given the
      * video information and the statistic option that will be applied.
      */
-    function ytpaGetVideoStatistic(video, dataOpt) {
+    function ytpaGetVideoStatistic(video, plotOptions) {
         var viewCount = parseInt(video.statistics.viewCount);
-        var aggViewCount = parseInt(video.statistics.aggViewCount);
         var likeCount = parseInt(video.statistics.likeCount);
         var dislikeCount = parseInt(video.statistics.dislikeCount);
         var commentCount = parseInt(video.statistics.commentCount);
 
-        if(dataOpt == ytpa.plot.opts.data.VIEWS) {
+        if(plotOptions.data == ytpa.plot.opts.data.VIEWS) {
             return viewCount;
-        } else if(dataOpt == ytpa.plot.opts.data.AGG_VIEWS) {
-            return aggViewCount;
-        } else if(dataOpt == ytpa.plot.opts.data.LIKE_RATIO) {
+        } else if(plotOptions.data == ytpa.plot.opts.data.LIKE_RATIO) {
             return likeCount / (likeCount + dislikeCount);
-        } else if(dataOpt == ytpa.plot.opts.data.LIKES_NORM) {
+        } else if(plotOptions.data == ytpa.plot.opts.data.LIKES_NORM) {
             return likeCount / viewCount;
-        } else if(dataOpt == ytpa.plot.opts.data.DISLIKES_NORM) {
+        } else if(plotOptions.data == ytpa.plot.opts.data.DISLIKES_NORM) {
             return dislikeCount / viewCount;
-        } else if(dataOpt == ytpa.plot.opts.data.COMMENTS_NORM) {
+        } else if(plotOptions.data == ytpa.plot.opts.data.COMMENTS_NORM) {
             return commentCount / viewCount;
-        } else if(dataOpt == ytpa.plot.opts.data.PARTICIPATION_NORM) {
+        } else if(plotOptions.data == ytpa.plot.opts.data.PARTICIPATION_NORM) {
             return (commentCount + likeCount + dislikeCount) / viewCount;
         } else {
             throw new RangeError("Given video statistic option is invalid.");
@@ -178,10 +176,10 @@
      * Generates and returns the video index for the given video given the
      * video information and the scaling option that will be applied.
      */
-    function ytpaGetVideoIndex(videoIndex, videoPlaylistLength, scaleOpt) {
-        if(scaleOpt == ytpa.plot.opts.scale.INDEX) {
+    function ytpaGetVideoIndex(videoIndex, videoPlaylistLength, plotOptions) {
+        if(plotOptions.scale == ytpa.plot.opts.scale.INDEX) {
             return videoIndex + 1;
-        } else if(scaleOpt == ytpa.plot.opts.scale.RATIO) {
+        } else if(plotOptions.scale == ytpa.plot.opts.scale.RATIO) {
             return videoIndex / ( videoPlaylistLength - 1 );
         } else {
             throw new RangeError("Given scaling option is invalid.");
@@ -191,11 +189,11 @@
     /**
      * Generates and returns the HTML for given video's tooltip.
      */
-    function ytpaGenerateTooltipHtml(video, videoIdx, dataOpt) {
+    function ytpaGenerateTooltipHtml(video, videoIdx, plotOptions) {
         return `<div class="ytpa-video-tooltip"><p>
             <b>Part ${videoIdx + 1}</b>: ${video.snippet.title}<br>
-            <b>${ytpa.plot.opts.data.props[dataOpt].name}</b>:
-            ${ytpaGetVideoStatistic(video, dataOpt)}<br>
+            <b>${ytpa.plot.opts.data.props[plotOptions.data].name}</b>:
+            ${ytpaGetVideoStatistic(video, plotOptions)}<br>
         </p></div>`;
     }
 
