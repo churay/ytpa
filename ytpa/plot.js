@@ -19,9 +19,8 @@
         2: {name: 'View-Normalized Likes', value: 2}, 3: {name: 'View-Normalized Dislikes', value: 3},
         4: {name: 'View-Normalized Comments', value: 4}, 5: {name: 'View-Normalized Participation', value: 5}}});
     /** An enumeration of all of the graph representation types. **/
-    ytpa.plot.opts.repr = Object.freeze({SERIES: 0, COLLECTION: 1, AGGREGATE: 2, AVERAGE: 3,
-        props: {0: {name: 'Series', value: 0}, 1: {name: 'Collection', value: 1},
-        2: {name: 'Aggregate', value: 2}, 3: {name: 'Average', value: 3}}});
+    ytpa.plot.opts.repr = Object.freeze({SERIES: 0, COLLECTION: 1,
+        props: {0: {name: 'Series', value: 0}, 1: {name: 'Collection', value: 1}}});
     /** An enumeration of all of the scale types that can be used for the graph. **/
     ytpa.plot.opts.scale = Object.freeze({INDEX: 0, RATIO: 1,
         props: {0: {name: 'Index', value: 0}, 1: {name: 'Ratio', value: 1}}});
