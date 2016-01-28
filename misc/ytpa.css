@@ -22,3 +22,12 @@
     text-overflow: ellipsis;
     width: 100%;
 }
+
+#ytpa-spinner {
+
+}
+
+#ytpa-graph {
+	height: 100%;
+	width: 100%;
+}
