@@ -201,7 +201,6 @@
             <b>Part ${videoIdx + 1}</b>: ${video.snippet.title}<br>
             <b>${ytpa.plot.opts.data.props[plotOptions.data].name}</b>:
             ${ytpaGetVideoStatistic(video, plotOptions)}<br>
-            <b>hi</b>
         </p></div>`;
     }
 
