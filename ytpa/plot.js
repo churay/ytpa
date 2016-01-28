@@ -12,18 +12,22 @@
 
     /** An object containing all of the option enumerations for plotting. **/
     ytpa.plot.opts = {};
+    /** An enumeration of all of the graph representation types. **/
+    ytpa.plot.opts.type = Object.freeze({SERIES: 0, COLLECTION: 1, AGGREGATE: 2,
+        props: {0: {name: 'Series', value: 0}, 1: {name: 'Collection', value: 1},
+        2: {name: 'Aggregate', value: 2}}});
     /** An enumeration of all of the options for the data being displayed. **/
     ytpa.plot.opts.data = Object.freeze({VIEWS: 0, LIKE_RATIO: 1, LIKES_NORM: 2,
         DISLIKES_NORM: 3, COMMENTS_NORM: 4, PARTICIPATION_NORM: 5,
         props: {0: {name: 'Views', value: 0}, 1: {name: 'Likes/Dislike Ratio', value: 1},
         2: {name: 'View-Normalized Likes', value: 2}, 3: {name: 'View-Normalized Dislikes', value: 3},
         4: {name: 'View-Normalized Comments', value: 4}, 5: {name: 'View-Normalized Participation', value: 5}}});
-    /** An enumeration of all of the graph representation types. **/
-    ytpa.plot.opts.repr = Object.freeze({SERIES: 0, COLLECTION: 1,
-        props: {0: {name: 'Series', value: 0}, 1: {name: 'Collection', value: 1}}});
     /** An enumeration of all of the scale types that can be used for the graph. **/
     ytpa.plot.opts.scale = Object.freeze({INDEX: 0, RATIO: 1,
         props: {0: {name: 'Index', value: 0}, 1: {name: 'Ratio', value: 1}}});
+    /** An enumeration of all of the grouping functions that can be used. **/
+    ytpa.plot.opts.group = Object.freeze({SUM: 0, AVERAGE: 1,
+        props: {0: {name: 'Sum', value: 0}, 1: {name: 'Average', value: 1}}});
 
     /**
      * Adds the playlist (given as a list of videos) to the graph visualization.
@@ -118,7 +122,7 @@
             interpolateNulls: plotOptions.scale == ytpa.plot.opts.scale.RATIO,
         };
 
-        var chartType = (plotOptions.repr == ytpa.plot.opts.repr.SERIES) ?
+        var chartType = (plotOptions.type == ytpa.plot.opts.type.SERIES) ?
             google.visualization.LineChart : google.visualization.ColumnChart;
         var chart = new chartType(document.getElementById('ytpa-graph'));
         chart.draw(chartData, chartOptions);
@@ -131,11 +135,15 @@
      * for the given representation option.
      */
     function ytpaGetPlaylistSortFunction(plotOptions) {
-        if(plotOptions.repr == ytpa.plot.opts.repr.SERIES) {
+        if(plotOptions.type == ytpa.plot.opts.type.SERIES) {
             return function(v1, v2) {
                 return (v1.snippet.publishedAt > v2.snippet.publishedAt) ? 1 : -1;
             };
-        } else if(plotOptions.repr == ytpa.plot.opts.repr.COLLECTION) {
+        } else if(plotOptions.type == ytpa.plot.opts.type.COLLECTION) {
+            return function(v1, v2) {
+                return ytpaGetVideoStatistic(v2, plotOptions) - ytpaGetVideoStatistic(v1, plotOptions);
+            };
+        } else if(plotOptions.type == ytpa.plot.opts.type.AGGREGATE) {
             return function(v1, v2) {
                 return ytpaGetVideoStatistic(v2, plotOptions) - ytpaGetVideoStatistic(v1, plotOptions);
             };

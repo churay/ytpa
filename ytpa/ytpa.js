@@ -50,6 +50,17 @@
     function ytpaDocumentInit() {
         var redrawFormPlot = function() { ytpa.plot.draw(ytpaGetFormPlotOptions()); };
         var queryNewChannel = function() { ytpaQueryFormChannel(); ytpa.plot.clear(); redrawFormPlot(); };
+        var redrawFormPlotAndOpts = function() {
+            redrawFormPlot();
+
+            var isGroupSelected = $('#ytpa-graphtype').val() == 2;
+            var enabledForm = isGroupSelected ? $('#ytpa-group') : $('#ytpa-scale');
+            var disabledForm = isGroupSelected ? $('#ytpa-scale') : $('#ytpa-group');
+
+            enabledForm.removeAttr('disabled');
+            disabledForm.attr('disabled', 'disabled');
+            $('.selectpicker').selectpicker('refresh');
+        };
 
         return new Promise(function(resolve) {
             $('.selectpicker').selectpicker();
@@ -68,13 +79,14 @@
                 ytpa.plot.playlists(playlistNames, playlistIDs, ytpaGetFormPlotOptions());
             });
 
+            $('#ytpa-graphtype').change(redrawFormPlotAndOpts);
             $('#ytpa-statistic').change(redrawFormPlot);
-            $('#ytpa-graphtype').change(redrawFormPlot);
             $('#ytpa-scale').change(redrawFormPlot);
+            $('#ytpa-group').change(redrawFormPlot);
 
             $('#ytpa-graph').height($('#ytpa-graph').width());
 
-            redrawFormPlot();
+            redrawFormPlotAndOpts();
 
             resolve();
         });
@@ -121,9 +133,10 @@
      */
     function ytpaGetFormPlotOptions() {
         return {
+            type: $('#ytpa-graphtype').val(),
             data: $('#ytpa-statistic').val(),
-            repr: $('#ytpa-graphtype').val(),
             scale: $('#ytpa-scale').val(),
+            group: $('#ytpa-group').val(),
         };
     }
 

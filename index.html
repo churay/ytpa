@@ -74,6 +74,19 @@
 						<div class="panel-body">
 							<form class="form-horizontal">
 								<div class="form-group">
+									<label for="ytpa-graphtype" class="col-sm-2 control-label">Type</label>
+									<div class="col-sm-10">
+										<select class="selectpicker form-control" id="ytpa-graphtype">
+											<option value=0>Series</option>
+											<option value=1>Collection</option>
+											<option value=2>Aggregate</option>
+										</select>
+									</div>
+								</div>
+							</form>
+
+							<form class="form-horizontal">
+								<div class="form-group">
 									<label for="ytpa-statistic" class="col-sm-2 control-label">Data</label>
 									<div class="col-sm-10">
 										<select class="selectpicker form-control" id="ytpa-statistic">
@@ -90,11 +103,11 @@
 
 							<form class="form-horizontal">
 								<div class="form-group">
-									<label for="ytpa-graphtype" class="col-sm-2 control-label">Type</label>
+									<label for="ytpa-scale" class="col-sm-2 control-label">Scale</label>
 									<div class="col-sm-10">
-										<select class="selectpicker form-control" id="ytpa-graphtype">
-											<option value=0>Series</option>
-											<option value=1>Collection</option>
+										<select class="selectpicker form-control" id="ytpa-scale">
+											<option value=0>Playlist Index</option>
+											<option value=1>Playlist Ratio</option>
 										</select>
 									</div>
 								</div>
@@ -102,11 +115,11 @@
 
 							<form class="form-horizontal">
 								<div class="form-group">
-									<label for="ytpa-scale" class="col-sm-2 control-label">Scale</label>
+									<label for="ytpa-group" class="col-sm-2 control-label">Group</label>
 									<div class="col-sm-10">
-										<select class="selectpicker form-control" id="ytpa-scale">
-											<option value=0>Playlist Index</option>
-											<option value=1>Playlist Ratio</option>
+										<select class="selectpicker form-control" id="ytpa-group">
+											<option value=0>Sum</option>
+											<option value=1>Average</option>
 										</select>
 									</div>
 								</div>
