@@ -190,7 +190,7 @@
             return playlist.videos.reduce(sumFxn, 0.0);
         } else if(plotOptions.group == ytpa.plot.opts.group.AVERAGE) {
             var sumFxn = (sum, v) => sum + ytpaGetVideoStatistic(v, plotOptions);
-            return playlist.videos.reduce(sumFxn, 0.0) / playlist.length;
+            return playlist.videos.reduce(sumFxn, 0.0) / playlist.videos.length;
         } else {
             throw new RangeError(`Group strategy '${plotOptions.group}' is invalid.`);
         }
