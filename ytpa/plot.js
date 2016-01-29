@@ -72,31 +72,10 @@
      * Redraws the graph visualization with all of the playlist data given.
      */
     ytpa.plot.draw = function(plotOptions) {
-        var playlistSort = ytpaGetPlaylistSortFunction(plotOptions);
-
         var playlistChartDataList = [];
         for(var playlistID in ytpaPlottedPlaylists) {
             var playlist = ytpaLoadedPlaylists[playlistID];
-            var playlistLength = playlist.videos.length;
-            var playlistVideos = playlist.videos.sort(playlistSort);
-
-            var playlistChartData = new google.visualization.DataTable();
-            playlistChartData.addColumn('number', 'Video Scaled Index');
-            playlistChartData.addColumn('number', playlist.name);
-            playlistChartData.addColumn({type: 'string', role: 'tooltip', p: {'html': true}});
-
-            for(var videoIdx in playlistVideos) {
-                var videoIdx = parseInt(videoIdx);
-                var playlistVideo = playlist.videos[videoIdx];
-
-                playlistChartData.addRow([
-                    ytpaGetVideoIndex(videoIdx, playlistLength, plotOptions),
-                    ytpaGetVideoStatistic(playlistVideo, plotOptions),
-                    ytpaGenerateTooltipHtml(playlistVideo, videoIdx, plotOptions),
-                ]);
-            }
-
-            playlistChartDataList.push(playlistChartData);
+            playlistChartDataList.push(ytpaGetPlaylistData(playlist, plotOptions));
         }
 
         var chartData = (playlistChartDataList.length > 0) ? playlistChartDataList.pop() :
@@ -106,29 +85,85 @@
                 playlistChartDataList[playlistIdx], 'full', [[0, 0]],
                 ytpa.lib.range(1, chartData.getNumberOfColumns()), [1, 2]);
 
-        var chartOptions = {
-            title: `Playlist Comparison for the "${$("#ytpa-channel").val()}" Channel`,
-            hAxis: {
-                title: `Playlist ${ytpa.plot.opts.scale.props[plotOptions.scale].name}`,
-                baselineColor: '#000000',
-                minValue: 1,
-            },
-            vAxis: {
-                title: `${ytpa.plot.opts.data.props[plotOptions.data].name}`,
-                baselineColor: '#000000',
-            },
-            explorer: {axis: 'horizontal', maxZoomOut: 1, keepInBounds: true},
-            tooltip: {isHtml: true},
-            interpolateNulls: plotOptions.scale == ytpa.plot.opts.scale.RATIO,
-        };
+        var chartOptions = ytpaGetChartOptions(plotOptions);
+        var chart = new chartOptions.type(document.getElementById('ytpa-graph'));
 
-        var chartType = (plotOptions.type == ytpa.plot.opts.type.SERIES) ?
-            google.visualization.LineChart : google.visualization.ColumnChart;
-        var chart = new chartType(document.getElementById('ytpa-graph'));
         chart.draw(chartData, chartOptions);
     };
 
     /// Private Members ///
+
+    /**
+     * Generates and returns the charting options associated with 
+     */
+    function ytpaGetChartOptions(plotOptions) {
+        var chartOpts = {};
+
+        chartOpts.title = `Playlist Comparison for "${$('#ytpa-channel').val()}"`;
+
+        chartOpts.hAxis = {
+            title: `Playlist ${ytpa.plot.opts.scale.props[plotOptions.scale].name}`,
+            baselineColor: '#000000',
+            minValue: 1,
+        };
+        chartOpts.vAxis = {
+            title: `${ytpa.plot.opts.data.props[plotOptions.data].name}`,
+            baselineColor: '#000000',
+        };
+
+        chartOpts.tooltip = {isHtml: true};
+        chartOpts.explorer = {axis: 'horizontal', maxZoomOut: 1, keepInBounds: true};
+        chartOpts.interpolateNulls = (plotOptions.scale == ytpa.plot.opts.scale.RATIO);
+
+        chartOpts.type = (plotOptions.type == ytpa.plot.opts.type.SERIES) ?
+            google.visualization.LineChart : google.visualization.ColumnChart;
+
+        return chartOpts;
+    }
+
+    /**
+     * Generates and returns the data for the given playlist with the given
+     * plot options in the format of a "google.visualization.DataTable".
+     */
+    function ytpaGetPlaylistData(playlist, plotOptions) {
+        var playlistChartData = new google.visualization.DataTable();
+        if(plotOptions.type <= ytpa.plot.opts.type.COLLECTION ) {
+            playlistChartData.addColumn('number', 'Video Scaled Index');
+            playlistChartData.addColumn('number', playlist.name);
+            playlistChartData.addColumn({type: 'string', role: 'tooltip', p: {'html': true}});
+
+            var playlistSortFxn = ytpaGetPlaylistSortFunction(plotOptions);
+            var playlistVideos = playlist.videos.sort(playlistSortFxn);
+            for(var videoIdx in playlistVideos) {
+                // NOTE(JRC): This is a little bit weird, but it allows the function
+                // signatures to look a bit cleaner, so I'll keep it for now.
+                var playlistVideo = playlist.videos[videoIdx];
+                playlistVideo.index = parseInt(videoIdx);
+
+                playlistChartData.addRow([
+                    ytpaGetVideoIndex(playlistVideo, playlist, plotOptions),
+                    ytpaGetVideoStatistic(playlistVideo, plotOptions),
+                    ytpaGenerateVideoTooltip(playlistVideo, plotOptions),
+                ]);
+            }
+        // TODO(JRC): This would be better accomplished by using a "GROUP_BY"
+        // operation on the playlist data table.
+        } else if(plotOptions.type == ytpa.plot.opts.type.AGGREGATE) {
+            playlistChartData.addColumn('string', 'Playlist Name');
+            playlistChartData.addColumn('number', 'Playlist Data');
+            playlistChartData.addColumn({type: 'string', role: 'tooltip', p: {'html': true}});
+
+            playlistChartData.addRow([
+                playlist.name,
+                ytpaGetPlaylistStatistic(playlist, plotOptions),
+                ytpaGeneratePlaylistTooltip(playlist, plotOptions),
+            ]);
+        } else {
+            throw new RangeError(`Graph type '${plotOptions.type}' is invalid.`);
+        }
+
+        return playlistChartData;
+    }
 
     /**
      * Generates and returns the function that sorts the a playlist's videos
@@ -136,25 +171,34 @@
      */
     function ytpaGetPlaylistSortFunction(plotOptions) {
         if(plotOptions.type == ytpa.plot.opts.type.SERIES) {
-            return function(v1, v2) {
-                return (v1.snippet.publishedAt > v2.snippet.publishedAt) ? 1 : -1;
-            };
+            return (v1, v2) => (v1.snippet.publishedAt > v2.snippet.publishedAt) ? 1 : -1;
         } else if(plotOptions.type == ytpa.plot.opts.type.COLLECTION) {
-            return function(v1, v2) {
-                return ytpaGetVideoStatistic(v2, plotOptions) - ytpaGetVideoStatistic(v1, plotOptions);
-            };
-        } else if(plotOptions.type == ytpa.plot.opts.type.AGGREGATE) {
-            return function(v1, v2) {
-                return ytpaGetVideoStatistic(v2, plotOptions) - ytpaGetVideoStatistic(v1, plotOptions);
-            };
+            return (v1, v2) => ytpaGetVideoStatistic(v2, plotOptions) - 
+                ytpaGetVideoStatistic(v1, plotOptions);
         } else {
-            throw new RangeError("Given playlist representation option is invalid.");
+            throw new RangeError(`Playlist representation option ${plotOptions.type} is invalid.`);
         }
     }
 
     /**
-     * Generates and returns the video statistic for the given video given the
-     * video information and the statistic option that will be applied.
+     * Generates and returns the statistic for the given playlist given the
+     * playlist information and the plot options to be applied.
+     */
+    function ytpaGetPlaylistStatistic(playlist, plotOptions) {
+        if(plotOptions.group == ytpa.plot.opts.group.SUM) {
+            var sumFxn = (sum, v) => sum + ytpaGetVideoStatistic(v, plotOptions);
+            return playlist.videos.reduce(sumFxn, 0.0);
+        } else if(plotOptions.group == ytpa.plot.opts.group.AVERAGE) {
+            var sumFxn = (sum, v) => sum + ytpaGetVideoStatistic(v, plotOptions);
+            return playlist.videos.reduce(sumFxn, 0.0) / playlist.length;
+        } else {
+            throw new RangeError(`Group strategy '${plotOptions.group}' is invalid.`);
+        }
+    }
+
+    /**
+     * Generates and returns the statistic for the given video given the
+     * video information and the plot options to be applied.
      */
     function ytpaGetVideoStatistic(video, plotOptions) {
         var viewCount = parseInt(video.statistics.viewCount);
@@ -175,7 +219,7 @@
         } else if(plotOptions.data == ytpa.plot.opts.data.PARTICIPATION_NORM) {
             return (commentCount + likeCount + dislikeCount) / viewCount;
         } else {
-            throw new RangeError("Given video statistic option is invalid.");
+            throw new RangeError(`Data option '${plotOptions.data}' is invalid.`);
         }
     }
 
@@ -183,22 +227,34 @@
      * Generates and returns the video index for the given video given the
      * video information and the scaling option that will be applied.
      */
-    function ytpaGetVideoIndex(videoIndex, videoPlaylistLength, plotOptions) {
+    function ytpaGetVideoIndex(video, playlist, plotOptions) {
         if(plotOptions.scale == ytpa.plot.opts.scale.INDEX) {
-            return videoIndex + 1;
+            return video.index + 1;
         } else if(plotOptions.scale == ytpa.plot.opts.scale.RATIO) {
-            return videoIndex / ( videoPlaylistLength - 1 );
+            return video.index / ( playlist.videos.length - 1 );
         } else {
-            throw new RangeError("Given scaling option is invalid.");
+            throw new RangeError(`Scale option '${plotOptions.scale}' is invalid.`);
         }
+    }
+
+    /**
+     * Generates and returns the HTML for given playlist's tooltip.
+     */
+    function ytpaGeneratePlaylistTooltip(playlist, plotOptions) {
+        return `<div class="ytpa-data-tooltip"><p>
+            <b>Playlist Name</b>: ${playlist.name}<br>
+            <b>${ytpa.plot.opts.group.props[plotOptions.group].name} of 
+            ${ytpa.plot.opts.data.props[plotOptions.data].name}</b>:
+            ${ytpaGetPlaylistStatistic(playlist, plotOptions)}<br>
+        </p></div>`;
     }
 
     /**
      * Generates and returns the HTML for given video's tooltip.
      */
-    function ytpaGenerateTooltipHtml(video, videoIdx, plotOptions) {
-        return `<div class="ytpa-video-tooltip"><p>
-            <b>Part ${videoIdx + 1}</b>: ${video.snippet.title}<br>
+    function ytpaGenerateVideoTooltip(video, plotOptions) {
+        return `<div class="ytpa-data-tooltip"><p>
+            <b>Part ${video.index + 1}</b>: ${video.snippet.title}<br>
             <b>${ytpa.plot.opts.data.props[plotOptions.data].name}</b>:
             ${ytpaGetVideoStatistic(video, plotOptions)}<br>
         </p></div>`;
