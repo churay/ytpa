@@ -80,10 +80,19 @@
 
         var chartData = (playlistChartDataList.length > 0) ? playlistChartDataList.pop() :
             google.visualization.arrayToDataTable([['', {role: 'annotation'}], ['', '']]);
-        for(var playlistIdx in playlistChartDataList)
-            chartData = google.visualization.data.join(chartData,
-                playlistChartDataList[playlistIdx], 'full', [[0, 0]],
-                ytpa.lib.range(1, chartData.getNumberOfColumns()), [1, 2]);
+
+        // TODO(JRC): Clean up this horrible mess by using 'group by'.
+        for(var playlistIdx in playlistChartDataList) {
+            if(plotOptions.type == ytpa.plot.opts.type.AGGREGATE) {
+                chartData = google.visualization.data.join(chartData,
+                    playlistChartDataList[playlistIdx], 'full', [[0, 0], [1, 1], [2, 2]],
+                    [], []);
+            } else {
+                chartData = google.visualization.data.join(chartData,
+                    playlistChartDataList[playlistIdx], 'full', [[0, 0]],
+                    ytpa.lib.range(1, chartData.getNumberOfColumns()), [1, 2]);
+            }
+        }
 
         var chartOptions = ytpaGetChartOptions(plotOptions);
         var chart = new chartOptions.type(document.getElementById('ytpa-graph'));
