@@ -81,9 +81,10 @@
             var playlistLength = playlist.videos.length;
 
             var playlistChartData = new google.visualization.DataTable();
-            playlistChartData.addColumn('number', 'Video Scaled Index');
+            playlistChartData.addColumn('number', 'Video Index');
             playlistChartData.addColumn('number', playlist.name);
             playlistChartData.addColumn({type: 'string', role: 'tooltip', p: {'html': true}});
+            playlistChartData.addColumn('string', 'Playlist');
             playlistChartData.addColumn('string', 'Title');
 
             for(var videoIdx in playlist.videos) {
@@ -92,13 +93,14 @@
                 var videoTitle = video.snippet.title;
                 var videoStat = ytpaGetVideoStatistic(video, plotOptions);
 
-                playlistChartData.addRow([videoNumber, videoStat, null, videoTitle]);
+                playlistChartData.addRow([videoNumber, videoStat, null,
+                    playlist.name, videoTitle]);
             }
 
             playlistChartData.sort({column: playlistSortCol, desc: playlistSortDesc});
             for(var videoRow = 0; videoRow < playlistLength; ++videoRow) {
                 var videoStat = playlistChartData.getValue(videoRow, 1);
-                var videoTitle = playlistChartData.getValue(videoRow, 3);
+                var videoTitle = playlistChartData.getValue(videoRow, 4);
                 var videoScaledIdx = (plotOptions.scale == ytpa.plot.opts.scale.INDEX) ?
                     videoRow + 1 : videoRow / (playlistLength - 1);
 
@@ -110,23 +112,44 @@
                     </p></div>`
                 );
             }
-            playlistChartData.removeColumn(3);
+
+            playlistChartData.removeColumn(4);
+            if(plotOptions.type != ytpa.plot.opts.type.AGGREGATE)
+                playlistChartData.removeColumn(3);
 
             playlistChartDataList.push(playlistChartData);
         }
 
-        /*
-         * if this is an aggregate sort, then each playlist data table needs to be compressed to a single column
-         * use group by, group by 'playlistName' (column 2), and use function according to type of aggregation
-         *
-         *   final table in this case will be something silly... best to just take the single value and then
-         *   create a new playlist table (['Playlist Index' (int), 'Playlist Name' (real, value), 'Tooltip'])
-         *
-         *   [ 1, 100, TT ], [ 1, 200, TT ], [ 1, 50, TT ]
-         *   sort by value of column 2 in the end (biggest to smallest, so descending)
-        */
+        if(plotOptions.type == ytpa.plot.opts.type.AGGREGATE) {
+            var playlistAggFxn = (plotOptions.group == ytpa.plot.opts.group.SUM) ?
+                google.visualization.data.sum : google.visualization.data.avg;
 
-        if(plotOptions.type == ytpa.plot.opts.type.AGGREGATE) { /** TODO(JRC) */ }
+            var playlistChartAggDataList = [];
+            for(var playlistIdx in playlistChartDataList) {
+                var playlistChartData = playlistChartDataList[playlistIdx];
+                var playlistChartAggData = google.visualization.data.group(
+                    playlistChartData, [3],
+                    [{column: 1, type: 'number', aggregation: playlistAggFxn}]);
+                playlistChartAggData.addColumn({type: 'string', role: 'tooltip', p: {'html': true}});
+
+                // TODO(JRC): Improve the key column so that it's a normal value.
+                var playlistTitle = playlistChartAggData.getValue(0, 0);
+                playlistChartAggData.setValue(0, 0, "1");
+                playlistChartAggData.setValue(0, 2,
+                    `<div class="ytpa-data-tooltip"><p>
+                        <b>Playlist Name</b>: ${playlistTitle}<br>
+                        <b>${ytpa.plot.opts.group.props[plotOptions.group].name} of 
+                        ${ytpa.plot.opts.data.props[plotOptions.data].name}</b>:
+                        ${playlistChartAggData.getValue(0, 1)}<br>
+                    </p></div>`
+                );
+
+                playlistChartAggDataList.push(playlistChartAggData);
+            }
+
+            // TODO(JRC): Sort these results so that the output is more readable.
+            playlistChartDataList = playlistChartAggDataList;
+        }
 
         var chartData = (playlistChartDataList.length > 0) ? playlistChartDataList.pop() :
             google.visualization.arrayToDataTable([['', {role: 'annotation'}], ['', '']]);
@@ -196,18 +219,6 @@
         } else {
             throw new RangeError(`Data option '${plotOptions.data}' is invalid.`);
         }
-    }
-
-    /**
-     * Generates and returns the HTML for given playlist's tooltip.
-     */
-    function ytpaGeneratePlaylistTooltip(playlist, plotOptions) {
-        return `<div class="ytpa-data-tooltip"><p>
-            <b>Playlist Name</b>: ${playlist.name}<br>
-            <b>${ytpa.plot.opts.group.props[plotOptions.group].name} of 
-            ${ytpa.plot.opts.data.props[plotOptions.data].name}</b>:
-            ${ytpaGetPlaylistStatistic(playlist, plotOptions)}<br>
-        </p></div>`;
     }
 
     /** A list of all of the playlists that are currently loaded. **/
