@@ -72,7 +72,8 @@
      * Redraws the graph visualization with all of the playlist data given.
      */
     ytpa.plot.draw = function(plotOptions) {
-        var playlistSortColumn = (plotOptions.type == ytpa.plot.opts.type.COLLECTION) ? 1 : 0;
+        var playlistSortDesc = plotOptions.type == ytpa.plot.opts.type.COLLECTION;
+        var playlistSortCol = playlistSortDesc ? 1 : 0;
 
         var playlistChartDataList = [];
         for(var playlistID in ytpaPlottedPlaylists) {
@@ -94,12 +95,12 @@
                 playlistChartData.addRow([videoNumber, videoStat, null, videoTitle]);
             }
 
-            playlistChartData.sort({column: playlistSortColumn, desc: false});
+            playlistChartData.sort({column: playlistSortCol, desc: playlistSortDesc});
             for(var videoRow = 0; videoRow < playlistLength; ++videoRow) {
                 var videoStat = playlistChartData.getValue(videoRow, 1);
                 var videoTitle = playlistChartData.getValue(videoRow, 3);
                 var videoScaledIdx = (plotOptions.scale == ytpa.plot.opts.scale.INDEX) ?
-                    videoRow : videoRow / playlistLength;
+                    videoRow + 1 : videoRow / (playlistLength - 1);
 
                 playlistChartData.setValue(videoRow, 0, videoScaledIdx);
                 playlistChartData.setValue(videoRow, 2,
@@ -115,9 +116,6 @@
         }
 
         /*
-         * set index to be null at the beginning always
-         * at the end, if it isn't the desired order, then sort by value and set index cell (calculate separately).
-         *
          * if this is an aggregate sort, then each playlist data table needs to be compressed to a single column
          * use group by, group by 'playlistName' (column 2), and use function according to type of aggregation
          *
@@ -126,9 +124,9 @@
          *
          *   [ 1, 100, TT ], [ 1, 200, TT ], [ 1, 50, TT ]
          *   sort by value of column 2 in the end (biggest to smallest, so descending)
-         *
-         * a
         */
+
+        if(plotOptions.type == ytpa.plot.opts.type.AGGREGATE) { /** TODO(JRC) */ }
 
         var chartData = (playlistChartDataList.length > 0) ? playlistChartDataList.pop() :
             google.visualization.arrayToDataTable([['', {role: 'annotation'}], ['', '']]);
