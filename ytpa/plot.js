@@ -75,6 +75,8 @@
         var playlistSortDesc = plotOptions.type == ytpa.plot.opts.type.COLLECTION;
         var playlistSortCol = playlistSortDesc ? 1 : 0;
 
+        var channelName = $("#ytpa-channel").val();
+
         var playlistChartDataList = [];
         for(var playlistID in ytpaPlottedPlaylists) {
             var playlist = ytpaLoadedPlaylists[playlistID];
@@ -90,6 +92,7 @@
 
             for(var videoIdx in playlist.videos) {
                 var video = playlist.videos[videoIdx];
+                var videoId = video.id;
                 var videoNumber = parseInt(videoIdx) + 1;
                 var videoTitle = video.snippet.title;
                 var videoStat = ytpaGetVideoStatistic(video, plotOptions);
@@ -105,11 +108,15 @@
                 var videoScaledIdx = (plotOptions.scale == ytpa.plot.opts.scale.INDEX) ?
                     videoRow + 1 : videoRow / (playlistLength - 1);
 
+                // TODO: Have video Id here
+                var videoId = "";
+
                 playlistChartData.setValue(videoRow, 0, videoScaledIdx);
                 playlistChartData.setValue(videoRow, 2,
                     `<div class="ytpa-data-tooltip"><p>
                         <b>Part ${videoRow + 1}</b>: ${videoTitle}<br>
                         <b>${ytpa.plot.opts.data.props[plotOptions.data].name}</b>: ${videoStat}<br>
+                        <b>Top comment:</b> ${ytpa.reddit.getTopCommentForLink(videoId, channelName)}
                     </p></div>`
                 );
             }
