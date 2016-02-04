@@ -25,7 +25,6 @@
             }
             return 5;
         });
-
     };
 
     ytpa.reddit.topComment = function(id, subreddit) {

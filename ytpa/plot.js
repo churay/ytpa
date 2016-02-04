@@ -92,7 +92,6 @@
 
             for(var videoIdx in playlist.videos) {
                 var video = playlist.videos[videoIdx];
-                var videoId = video.id;
                 var videoNumber = parseInt(videoIdx) + 1;
                 var videoTitle = video.snippet.title;
                 var videoStat = ytpaGetVideoStatistic(video, plotOptions);
@@ -108,15 +107,11 @@
                 var videoScaledIdx = (plotOptions.scale == ytpa.plot.opts.scale.INDEX) ?
                     videoRow + 1 : videoRow / (playlistLength - 1);
 
-                // TODO: Have video Id here
-                var videoId = "";
-
                 playlistChartData.setValue(videoRow, 0, videoScaledIdx);
                 playlistChartData.setValue(videoRow, 2,
                     `<div class="ytpa-data-tooltip"><p>
                         <b>Part ${videoRow + 1}</b>: ${videoTitle}<br>
                         <b>${ytpa.plot.opts.data.props[plotOptions.data].name}</b>: ${videoStat}<br>
-                        <b>Top comment:</b> ${ytpa.reddit.getTopCommentForLink(videoId, channelName)}
                     </p></div>`
                 );
             }
@@ -166,14 +161,17 @@
             playlistChartDataList = playlistChartAggDataList;
         }
 
-        var chartData = (playlistChartDataList.length > 0) ? playlistChartDataList.shift() :
+        var isChartEmpty = playlistChartDataList.length == 0;
+        var chartData = !isChartEmpty ? playlistChartDataList.shift() :
             google.visualization.arrayToDataTable([['', {role: 'annotation'}], ['', '']]);
         for(var playlistIdx in playlistChartDataList)
             chartData = google.visualization.data.join(chartData,
                 playlistChartDataList[playlistIdx], 'full', [[0, 0]],
                 ytpa.lib.range(1, chartData.getNumberOfColumns()), [1, 2]);
 
-        var chartOptions = ytpaGetChartOptions(plotOptions);
+        // TODO(JRC): Determine a better way to draw an empty chart if there
+        // isn't any playlist data to plot.
+        var chartOptions = ytpaGetChartOptions(plotOptions, isChartEmpty);
         var chart = new chartOptions.type(document.getElementById('ytpa-graph'));
 
         chart.draw(chartData, chartOptions);
@@ -184,7 +182,7 @@
     /**
      * Generates and returns the charting options associated with 
      */
-    function ytpaGetChartOptions(plotOptions) {
+    function ytpaGetChartOptions(plotOptions, isPlotEmpty) {
         var isAggChart = plotOptions.type == ytpa.plot.opts.type.AGGREGATE;
         var chartAggType = ytpa.plot.opts.group.props[plotOptions.group].name;
         var chartScaleType = ytpa.plot.opts.scale.props[plotOptions.scale].name;
@@ -205,8 +203,9 @@
         };
 
         chartOpts.tooltip = {isHtml: true};
-        chartOpts.explorer = {axis: 'horizontal', maxZoomOut: 1, keepInBounds: true};
         chartOpts.interpolateNulls = plotOptions.scale == ytpa.plot.opts.scale.RATIO;
+        chartOpts.explorer = isPlotEmpty ? undefined :
+            {axis: 'horizontal', maxZoomOut: 1, keepInBounds: true};
 
         chartOpts.type = (plotOptions.type == ytpa.plot.opts.type.SERIES) ?
             google.visualization.LineChart : google.visualization.ColumnChart;
