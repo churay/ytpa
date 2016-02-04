@@ -67,7 +67,7 @@
 
             $('#ytpa-channel').keypress(function(e) { 
                 if(e.which == 13) {
-                    var target = document.getElementById('ytpa-spinner');
+                    var target = $(".spinner-container").get(0);
                     var spinner = new Spinner(ytpa.config.spinner).spin(target);
                     $(document).on('populated', function() { spinner.stop(); });
                     queryNewChannel();
@@ -75,7 +75,7 @@
             });
 
             $('#ytpa-channel-submit').click(function() {
-                var target = document.getElementById('ytpa-spinner');
+                var target = $(".spinner-container").get(0);
                 var spinner = new Spinner(ytpa.config.spinner).spin(target);
                 $(document).on('populated', function() { spinner.stop(); });
                 queryNewChannel();
