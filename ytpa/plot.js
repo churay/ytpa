@@ -85,6 +85,7 @@
             playlistChartData.addColumn('number', playlist.name);
             playlistChartData.addColumn({type: 'string', role: 'tooltip', p: {'html': true}});
             playlistChartData.addColumn('string', 'Playlist');
+            playlistChartData.addColumn('number', 'Playlist Length');
             playlistChartData.addColumn('string', 'Title');
 
             for(var videoIdx in playlist.videos) {
@@ -94,13 +95,13 @@
                 var videoStat = ytpaGetVideoStatistic(video, plotOptions);
 
                 playlistChartData.addRow([videoNumber, videoStat, null,
-                    playlist.name, videoTitle]);
+                    playlist.name, playlistLength, videoTitle]);
             }
 
             playlistChartData.sort({column: playlistSortCol, desc: playlistSortDesc});
             for(var videoRow = 0; videoRow < playlistLength; ++videoRow) {
                 var videoStat = playlistChartData.getValue(videoRow, 1);
-                var videoTitle = playlistChartData.getValue(videoRow, 4);
+                var videoTitle = playlistChartData.getValue(videoRow, 5);
                 var videoScaledIdx = (plotOptions.scale == ytpa.plot.opts.scale.INDEX) ?
                     videoRow + 1 : videoRow / (playlistLength - 1);
 
@@ -113,9 +114,11 @@
                 );
             }
 
-            playlistChartData.removeColumn(4);
-            if(plotOptions.type != ytpa.plot.opts.type.AGGREGATE)
+            playlistChartData.removeColumn(5);
+            if(plotOptions.type != ytpa.plot.opts.type.AGGREGATE) {
+                playlistChartData.removeColumn(4);
                 playlistChartData.removeColumn(3);
+            }
 
             playlistChartDataList.push(playlistChartData);
         }
@@ -128,30 +131,35 @@
             for(var playlistIdx in playlistChartDataList) {
                 var playlistChartData = playlistChartDataList[playlistIdx];
                 var playlistChartAggData = google.visualization.data.group(
-                    playlistChartData, [3],
+                    playlistChartData, [3, 4],
                     [{column: 1, type: 'number', aggregation: playlistAggFxn}]);
                 playlistChartAggData.addColumn({type: 'string', role: 'tooltip', p: {'html': true}});
 
-                // TODO(JRC): Improve the key column so that it's a normal value.
                 var playlistTitle = playlistChartAggData.getValue(0, 0);
-                playlistChartAggData.setValue(0, 0, "1");
-                playlistChartAggData.setValue(0, 2,
+                var playlistLength = playlistChartAggData.getValue(0, 1);
+                playlistChartAggData.setValue(0, 0, " ");
+                playlistChartAggData.setValue(0, 3,
                     `<div class="ytpa-data-tooltip"><p>
                         <b>Playlist Name</b>: ${playlistTitle}<br>
+                        <b>Playlist Length</b>: ${playlistLength}<br>
                         <b>${ytpa.plot.opts.group.props[plotOptions.group].name} of 
                         ${ytpa.plot.opts.data.props[plotOptions.data].name}</b>:
-                        ${playlistChartAggData.getValue(0, 1)}<br>
+                        ${playlistChartAggData.getValue(0, 2)}<br>
                     </p></div>`
                 );
+
+                playlistChartAggData.removeColumn(1);
 
                 playlistChartAggDataList.push(playlistChartAggData);
             }
 
-            // TODO(JRC): Sort these results so that the output is more readable.
+            playlistChartAggDataList.sort(function(ad1, ad2) {
+                return ad2.getValue(0, 1) - ad1.getValue(0, 1);
+            });
             playlistChartDataList = playlistChartAggDataList;
         }
 
-        var chartData = (playlistChartDataList.length > 0) ? playlistChartDataList.pop() :
+        var chartData = (playlistChartDataList.length > 0) ? playlistChartDataList.shift() :
             google.visualization.arrayToDataTable([['', {role: 'annotation'}], ['', '']]);
         for(var playlistIdx in playlistChartDataList)
             chartData = google.visualization.data.join(chartData,
@@ -170,23 +178,28 @@
      * Generates and returns the charting options associated with 
      */
     function ytpaGetChartOptions(plotOptions) {
+        var isAggChart = plotOptions.type == ytpa.plot.opts.type.AGGREGATE;
+        var chartAggType = ytpa.plot.opts.group.props[plotOptions.group].name;
+        var chartScaleType = ytpa.plot.opts.scale.props[plotOptions.scale].name;
+        var chartData = ytpa.plot.opts.data.props[plotOptions.data].name;
+
         var chartOpts = {};
 
         chartOpts.title = `Playlist Comparison for "${$('#ytpa-channel').val()}"`;
 
         chartOpts.hAxis = {
-            title: `Playlist ${ytpa.plot.opts.scale.props[plotOptions.scale].name}`,
+            title: isAggChart ? `Playlist` : `Playlist ${chartScaleType}`,
             baselineColor: '#000000',
             minValue: 1,
         };
         chartOpts.vAxis = {
-            title: `${ytpa.plot.opts.data.props[plotOptions.data].name}`,
+            title: (isAggChart ? `${chartAggType} of ` : ``) + `Playlist ${chartData}`,
             baselineColor: '#000000',
         };
 
         chartOpts.tooltip = {isHtml: true};
         chartOpts.explorer = {axis: 'horizontal', maxZoomOut: 1, keepInBounds: true};
-        chartOpts.interpolateNulls = (plotOptions.scale == ytpa.plot.opts.scale.RATIO);
+        chartOpts.interpolateNulls = plotOptions.scale == ytpa.plot.opts.scale.RATIO;
 
         chartOpts.type = (plotOptions.type == ytpa.plot.opts.type.SERIES) ?
             google.visualization.LineChart : google.visualization.ColumnChart;
