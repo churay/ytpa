@@ -2,18 +2,22 @@
  * @file query.js
  *
  * A library script that contains all of the functionality associated with
- * querying the YouTube API for video data and analytics.
+ * querying the YouTube and Reddit APIs for video metadata and analytics.
  */
 
 ( function(ytpa, $, undefined) {
     /// Public Members ///
 
     ytpa.query = ytpa.query || {};
+    ytpa.query.youtube = ytpa.query.youtube || {};
+    ytpa.query.reddit = ytpa.query.reddit || {};
+
+    // YouTube Query Functions //
 
     /**
      * Returns a promise that returns all of the playlist objects for a given user.
      */
-    ytpa.query.playlists = function(user, numResults) {
+    ytpa.query.youtube.playlists = function(user, numResults) {
         var uidRequestOptions = {
             part: 'id',
             forUsername: user,
@@ -27,7 +31,7 @@
                 channelId: channelID,
             };
 
-            return ytpa.query.items( gapi.client.youtube.playlists.list,
+            return ytpa.query.youtube.items( gapi.client.youtube.playlists.list,
                 plidRequestOptions, numResults );
 
         }).then(function(response) {
@@ -60,7 +64,7 @@
     /**
      * Returns a promise that returns all of the upload objects for a given user.
      */
-    ytpa.query.uploads = function(user, numResults) {
+    ytpa.query.youtube.uploads = function(user, numResults) {
         var uplRequestOptions = {
             part: 'contentDetails',
             forUsername: user,
@@ -74,7 +78,7 @@
                 playlistId: uploadsPLID,
             };
 
-            return ytpa.query.items( gapi.client.youtube.playlistItems.list,
+            return ytpa.query.youtube.items( gapi.client.youtube.playlistItems.list,
                 uplplRequestOptions, numResults );
 
         }).then(function(response) {
@@ -107,14 +111,14 @@
     /**
      * Returns a promise that contains all the videos in a playlist given its ID.
      */
-    ytpa.query.playlistvideos = function(playlistID) {
+    ytpa.query.youtube.playlistvideos = function(playlistID) {
         var requestOptions = {
             part: 'contentDetails',
             playlistId: playlistID,
         };
 
-        return ytpa.query.items(gapi.client.youtube.playlistItems.list, requestOptions
-        ).then(function(response) {
+        return ytpa.query.youtube.items(gapi.client.youtube.playlistItems.list,
+            requestOptions ).then(function(response) {
             var playlistBatchRequest = gapi.client.newBatch();
 
             var playlistItems = response; 
@@ -147,7 +151,7 @@
     /**
      * Returns a promise that returns the items for a given request.
      */
-    ytpa.query.items = function(requestFunction, requestOptions, numResults, _results) {
+    ytpa.query.youtube.items = function(requestFunction, requestOptions, numResults, _results) {
         var numResults = (numResults !== undefined) ? numResults : Number.POSITIVE_INFINITY;
         var _results = (_results !== undefined) ? _results : [];
 
@@ -163,10 +167,39 @@
                 var nextNumResults = Math.min(numResults,
                     response.result.pageInfo.totalResults);
 
-                return ytpa.query.items(requestFunction, nextRequestOptions,
+                return ytpa.query.youtube.items(requestFunction, nextRequestOptions,
                     nextNumResults, nextRequestResults);
             });
         }
+    };
+
+    // Reddit Query Functions //
+
+    /**
+     * Returns the top comment in the most related Reddit thread for the
+     * given channel's video.
+     */
+    ytpa.query.reddit.topcomment = function(videoID, channel) {
+        var videoURL = `https://www.youtube.com/watch?v=${videoID}`;
+
+        return reddit.search(videoURL).t('all').limit(10).sort('top').fetch(
+        ).then(function(response) {
+            var bestThread = response.data.children[0];
+            for(var threadIdx in response.data.children) {
+                var thread = response.data.children[threadIdx].data;
+
+                if(thread.subreddit.toLowerCase() == channel.toLowerCase()) {
+                    bestThread = thread;
+                    break;
+                }
+            }
+
+            return reddit.comments(bestThread.id,
+                bestThread.subreddit).limit(1).sort('top').fetch();
+
+        }).then(function(response) {
+            return response[1].data.children[0].data.body;
+        });
     };
 
 }(window.ytpa = window.ytpa || {}, jQuery) );

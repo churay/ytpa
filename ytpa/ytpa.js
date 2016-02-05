@@ -112,7 +112,7 @@
     function ytpaQueryFormChannel() {
         var channelName = $('#ytpa-channel').val();
         try {
-            ytpa.query.playlists(channelName).then(function(playlists) {
+            ytpa.query.youtube.playlists(channelName).then(function(playlists) {
                 playlists.sort(function(p1, p2) {
                     return (p1.snippet.title > p2.snippet.title) ? 1 : -1;
                 });

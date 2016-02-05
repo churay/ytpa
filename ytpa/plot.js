@@ -34,7 +34,7 @@
      */
     ytpa.plot.playlists = function(playlistNames, playlistIDs, plotOptions) {
         var genPlaylistRequest = function(plname, plid) {
-            return ytpa.query.playlistvideos(plid).then(function(videos) {
+            return ytpa.query.youtube.playlistvideos(plid).then(function(videos) {
                 return {id: plid, name: plname, videos: videos};
             });
         };
