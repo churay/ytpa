@@ -10,9 +10,6 @@
 
     ytpa.query = ytpa.query || {};
 
-    /** The maximum number of results that can be returned from any YouTube request. */
-    ytpa.query.MAXRESULTS = 50;
-
     /**
      * Returns a promise that returns all of the playlist objects for a given user.
      */
@@ -157,7 +154,7 @@
         if(_results.length >= numResults) {
             return _results.slice(0, numResults);
         } else {
-            requestOptions.maxResults = ytpa.query.MAXRESULTS;
+            requestOptions.maxResults = 50;
             return requestFunction(requestOptions).then(function(response) {
                 var nextRequestOptions = jQuery.extend(true, {}, requestOptions);
                 nextRequestOptions.pageToken = response.result.nextPageToken;

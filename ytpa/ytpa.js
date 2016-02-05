@@ -65,7 +65,7 @@
         return new Promise(function(resolve) {
             $('.selectpicker').selectpicker();
 
-            $('#ytpa-channel').keypress(function(e) { 
+            $('#ytpa-channel').keypress(function(e) {
                 if(e.which == 13) {
                     var target = $(".spinner-container").get(0);
                     var spinner = new Spinner(ytpa.config.spinner).spin(target);
