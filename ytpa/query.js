@@ -180,7 +180,7 @@
      * given channel's video.
      */
     ytpa.query.reddit.topcomment = function(videoID, channel) {
-        var videoURL = `https://www.youtube.com/watch?v=${videoID}`;
+        var videoURL = `url:https://www.youtube.com/watch?v=${videoID}`;
 
         return reddit.search(videoURL).t('all').limit(10).sort('top').fetch(
         ).then(function(response) {

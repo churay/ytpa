@@ -190,16 +190,18 @@
                 var selectedVideoID = selectedVideoInfo.substring(9, 20);
                 var selectedChannel = $('#ytpa-channel').val();
 
-                /*
                 ytpa.query.reddit.topcomment(selectedVideoID, selectedChannel).then(
                 function(comment) {
                     var updatedTooltip = selectedTooltip.replace('<!--', '')
                         .replace('-->', '').replace('TOPREDDITCOMMENT', comment);
 
+                    console.log(comment);
+
+                    /*
                     chart.setValue(selectedRow, selectedCol, updatedTooltip);
                     chart.draw(chartData, chartOptions);
+                    */
                 });
-                */
             });
         }
 
