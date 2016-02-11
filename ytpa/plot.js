@@ -115,7 +115,7 @@
                     `<div class="ytpa-data-tooltip" data-id="${videoID}"><p>
                         <b>Part ${videoRow + 1}</b>: ${videoTitle}<br>
                         <b>${ytpa.plot.opts.data.props[plotOptions.data].name}</b>: ${videoStat}<br>
-                        <!--<b>Top Reddit Comment</b>: TOPREDDITCOMMENT-->
+                        <!--<b>Top Comment</b>: TOPREDDITCOMMENT-->
                     </p></div>`
                 );
             }
@@ -195,12 +195,8 @@
                     var updatedTooltip = selectedTooltip.replace('<!--', '')
                         .replace('-->', '').replace('TOPREDDITCOMMENT', comment);
 
-                    console.log(comment);
-
-                    /*
-                    chart.setValue(selectedRow, selectedCol, updatedTooltip);
+                    chartData.setValue(selectedRow, selectedCol, updatedTooltip);
                     chart.draw(chartData, chartOptions);
-                    */
                 });
             });
         }
