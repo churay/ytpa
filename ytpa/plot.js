@@ -86,9 +86,11 @@
             playlistChartData.addColumn('number', 'Video Index');
             playlistChartData.addColumn('number', playlist.name);
             playlistChartData.addColumn({type: 'string', role: 'tooltip', p: {'html': true}});
+
             playlistChartData.addColumn('string', 'Playlist');
             playlistChartData.addColumn('number', 'Playlist Length');
-            playlistChartData.addColumn('string', 'Title');
+            playlistChartData.addColumn('string', 'Video ID');
+            playlistChartData.addColumn('string', 'Video Title');
 
             for(var videoIdx in playlist.videos) {
                 var video = playlist.videos[videoIdx];
@@ -97,25 +99,28 @@
                 var videoStat = ytpaGetVideoStatistic(video, plotOptions);
 
                 playlistChartData.addRow([videoNumber, videoStat, null,
-                    playlist.name, playlistLength, videoTitle]);
+                    playlist.name, playlistLength, video.id, videoTitle]);
             }
 
             playlistChartData.sort({column: playlistSortCol, desc: playlistSortDesc});
             for(var videoRow = 0; videoRow < playlistLength; ++videoRow) {
                 var videoStat = playlistChartData.getValue(videoRow, 1);
-                var videoTitle = playlistChartData.getValue(videoRow, 5);
+                var videoID = playlistChartData.getValue(videoRow, 5);
+                var videoTitle = playlistChartData.getValue(videoRow, 6);
                 var videoScaledIdx = (plotOptions.scale == ytpa.plot.opts.scale.INDEX) ?
                     videoRow + 1 : videoRow / (playlistLength - 1);
 
                 playlistChartData.setValue(videoRow, 0, videoScaledIdx);
                 playlistChartData.setValue(videoRow, 2,
-                    `<div class="ytpa-data-tooltip"><p>
+                    `<div class="ytpa-data-tooltip" data-id="${videoID}"><p>
                         <b>Part ${videoRow + 1}</b>: ${videoTitle}<br>
                         <b>${ytpa.plot.opts.data.props[plotOptions.data].name}</b>: ${videoStat}<br>
+                        <!--<b>Top Reddit Comment</b>: TOPREDDITCOMMENT-->
                     </p></div>`
                 );
             }
 
+            playlistChartData.removeColumn(6);
             playlistChartData.removeColumn(5);
             if(plotOptions.type != ytpa.plot.opts.type.AGGREGATE) {
                 playlistChartData.removeColumn(4);
@@ -173,6 +178,30 @@
         // isn't any playlist data to plot.
         var chartOptions = ytpaGetChartOptions(plotOptions, isChartEmpty);
         var chart = new chartOptions.type(document.getElementById('ytpa-graph'));
+
+        if(plotOptions.type != ytpa.plot.opts.type.AGGREGATE) {
+            // TODO(JRC): Change this to be a "onmouseover" event.
+            google.visualization.events.addListener(chart, 'select', function() {
+                var selectedRow = chart.getSelection()[0].row;
+                var selectedCol = chart.getSelection()[0].column + 1;
+
+                var selectedTooltip = chartData.getValue(selectedRow, selectedCol);
+                var selectedVideoInfo = selectedTooltip.match(/data-id=".+"/gi)[0];
+                var selectedVideoID = selectedVideoInfo.substring(9, 20);
+                var selectedChannel = $('#ytpa-channel').val();
+
+                /*
+                ytpa.query.reddit.topcomment(selectedVideoID, selectedChannel).then(
+                function(comment) {
+                    var updatedTooltip = selectedTooltip.replace('<!--', '')
+                        .replace('-->', '').replace('TOPREDDITCOMMENT', comment);
+
+                    chart.setValue(selectedRow, selectedCol, updatedTooltip);
+                    chart.draw(chartData, chartOptions);
+                });
+                */
+            });
+        }
 
         chart.draw(chartData, chartOptions);
     };
