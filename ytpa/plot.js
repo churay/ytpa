@@ -180,8 +180,6 @@
         var chart = new chartOptions.type(document.getElementById('ytpa-graph'));
 
         if(plotOptions.type != ytpa.plot.opts.type.AGGREGATE) {
-            // TODO(JRC): Fix the bug that's preventing comments from loading
-            // when multiple playlists are being displayed.
             google.visualization.events.addListener(chart, 'onmouseover', function(e) {
                 var selectedRow = e.row; var selectedCol = e.column + 1;
                 var selectedTooltip = chartData.getValue(selectedRow, selectedCol);
@@ -196,7 +194,10 @@
                         var updatedTooltip = selectedTooltip.replace('<!--', '')
                             .replace('-->', '').replace('TOPREDDITCOMMENT', comment);
 
-                        chartData.setValue(selectedRow, selectedCol, updatedTooltip);
+                        // NOTE(JRC): 'DataTable.setCell' is used here because
+                        // the default behavior for 'DataTable.setValue' is to
+                        // set the formatted value instead of the table value.
+                        chartData.setCell(selectedRow, selectedCol, updatedTooltip, updatedTooltip);
                         chart.draw(chartData, chartOptions);
                     });
                 }
