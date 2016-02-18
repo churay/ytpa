@@ -180,24 +180,26 @@
         var chart = new chartOptions.type(document.getElementById('ytpa-graph'));
 
         if(plotOptions.type != ytpa.plot.opts.type.AGGREGATE) {
-            // TODO(JRC): Change this to be a "onmouseover" event.
-            google.visualization.events.addListener(chart, 'select', function() {
-                var selectedRow = chart.getSelection()[0].row;
-                var selectedCol = chart.getSelection()[0].column + 1;
-
+            // TODO(JRC): Fix the bug that's preventing comments from loading
+            // when multiple playlists are being displayed.
+            google.visualization.events.addListener(chart, 'onmouseover', function(e) {
+                var selectedRow = e.row; var selectedCol = e.column + 1;
                 var selectedTooltip = chartData.getValue(selectedRow, selectedCol);
-                var selectedVideoInfo = selectedTooltip.match(/data-id=".+"/gi)[0];
-                var selectedVideoID = selectedVideoInfo.substring(9, 20);
-                var selectedChannel = $('#ytpa-channel').val();
 
-                ytpa.query.reddit.topcomment(selectedVideoID, selectedChannel).then(
-                function(comment) {
-                    var updatedTooltip = selectedTooltip.replace('<!--', '')
-                        .replace('-->', '').replace('TOPREDDITCOMMENT', comment);
+                if(selectedTooltip.includes('TOPREDDITCOMMENT')) {
+                    var selectedVideoInfo = selectedTooltip.match(/data-id=".+"/gi)[0];
+                    var selectedVideoID = selectedVideoInfo.substring(9, 20);
+                    var selectedChannel = $('#ytpa-channel').val();
 
-                    chartData.setValue(selectedRow, selectedCol, updatedTooltip);
-                    chart.draw(chartData, chartOptions);
-                });
+                    ytpa.query.reddit.topcomment(selectedVideoID, selectedChannel).then(
+                    function(comment) {
+                        var updatedTooltip = selectedTooltip.replace('<!--', '')
+                            .replace('-->', '').replace('TOPREDDITCOMMENT', comment);
+
+                        chartData.setValue(selectedRow, selectedCol, updatedTooltip);
+                        chart.draw(chartData, chartOptions);
+                    });
+                }
             });
         }
 
