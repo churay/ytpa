@@ -194,10 +194,13 @@
                     ytpa.query.reddit.topcomment(selectedVideoID, selectedChannel).then(
                     function(comment) {
                         var updatedTooltip = selectedTooltip.replace('<!--', '')
-                            .replace('-->', '').replace('TOPREDDITCOMMENT', comment);
+                            .replace('-->', '').replace('TOPREDDITCOMMENT', `<div id='test'>Show<div class="reddit-embed" data-embed-media="www.redditmedia.com" data-embed-parent="false" data-embed-live="true" data-embed-created="2016-02-18T03:37:59.795Z"><a href="https://www.reddit.com/r/gamegrumps/comments/46alnv/ross_comment_on_doug_walkernostalgia_critics_new/d03y34g">Comment</a> from discussion <a href="https://www.reddit.com/r/gamegrumps/comments/46alnv/ross_comment_on_doug_walkernostalgia_critics_new/">Ross&#x27; comment on Doug Walker(Nostalgia Critic)&#x27;s new &quot;Where&#x27;s the Fair Use?&quot; video.</a>.</div></div>`);
 
                         chartData.setValue(selectedRow, selectedCol, updatedTooltip);
+
                         chart.draw(chartData, chartOptions);
+                    }).then(function(){
+                        setTimeout(function(){$('#test').append('<script async src="https://www.redditstatic.com/comment-embed.js"></script>')},1000)
                     });
                 }
             });

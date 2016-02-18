@@ -5,6 +5,10 @@
  * "ytpa" application.
  */
 
+iframe {
+	width: 250px !important;
+}
+
 #ytpa-header {
     padding-bottom: 10px;
 }
