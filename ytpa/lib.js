@@ -49,6 +49,6 @@
     /// Private Members ///
 
     /** The object responsible for formatting all of the numbers. */
-    var numberFormatter = new Intl.NumberFormat();
+    var numberFormatter = new Intl.NumberFormat('en-US', {maximumFractionDigits: 3});
 
 }(window.ytpa = window.ytpa || {}, jQuery) );
