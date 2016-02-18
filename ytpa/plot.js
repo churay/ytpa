@@ -114,7 +114,7 @@
                 playlistChartData.setValue(videoRow, 2,
                     `<div class="ytpa-data-tooltip" data-id="${videoID}"><p>
                         <b>Part ${videoRow + 1}</b>: ${videoTitle}<br>
-                        <b>${ytpa.plot.opts.data.props[plotOptions.data].name}</b>: ${videoStat}<br>
+                        <b>${ytpa.plot.opts.data.props[plotOptions.data].name}</b>: ${ytpa.lib.formatnumber(videoStat)}<br>
                         <!--<b>Top Comment</b>: TOPREDDITCOMMENT-->
                     </p></div>`
                 );
@@ -151,7 +151,7 @@
                         <b>Playlist Length</b>: ${playlistLength}<br>
                         <b>${ytpa.plot.opts.group.props[plotOptions.group].name} of 
                         ${ytpa.plot.opts.data.props[plotOptions.data].name}</b>:
-                        ${playlistChartAggData.getValue(0, 2)}<br>
+                        ${ytpa.lib.formatnumber(playlistChartAggData.getValue(0, 2))}<br>
                     </p></div>`
                 );
 
