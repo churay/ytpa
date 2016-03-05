@@ -110,8 +110,10 @@
      * populates the form playlists with this channel's information.
      */
     function ytpaQueryFormChannel() {
-        var channelName = $('#ytpa-channel').val();
         try {
+            var channelName = $('#ytpa-channel').val();
+            if (channelName.trim() == "") throw "Invalid channel name";
+
             ytpa.query.youtube.playlists(channelName).then(function(playlists) {
                 playlists.sort(function(p1, p2) {
                     return (p1.snippet.title > p2.snippet.title) ? 1 : -1;
@@ -138,6 +140,7 @@
             });
         } catch(error) {
             console.log('Invalid channel name!');
+            $(document).trigger('populated');
         }
     }
 
