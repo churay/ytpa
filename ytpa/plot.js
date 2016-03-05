@@ -115,7 +115,7 @@
                     `<div class="ytpa-data-tooltip" data-id="${videoID}"><p>
                         <b>Part ${videoRow + 1}</b>: ${videoTitle}<br>
                         <b>${ytpa.plot.opts.data.props[plotOptions.data].name}</b>: ${ytpa.lib.formatnumber(videoStat)}<br>
-                        <!--<b>Top Comment</b>: TOPREDDITCOMMENT-->
+                        <b>Top Comment</b>: {0}
                     </p></div>`
                 );
             }
@@ -184,19 +184,17 @@
                 var selectedRow = e.row; var selectedCol = e.column + 1;
                 var selectedTooltip = chartData.getValue(selectedRow, selectedCol);
 
-                if(selectedTooltip.includes('TOPREDDITCOMMENT')) {
+                if(selectedTooltip.match(/\{(\d+)\}/g)) {
                     var selectedVideoInfo = selectedTooltip.match(/data-id=".+"/gi)[0];
                     var selectedVideoID = selectedVideoInfo.substring(9, 20);
                     var selectedChannel = $('#ytpa-channel').val();
 
                     ytpa.query.reddit.topcomment(selectedVideoID, selectedChannel).then(
                     function(comment) {
-                        var updatedTooltip = selectedTooltip.replace('<!--', '')
-                            .replace('-->', '').replace('TOPREDDITCOMMENT', comment);
-
                         // NOTE(JRC): 'DataTable.setCell' is used here because
                         // the default behavior for 'DataTable.setValue' is to
                         // set the formatted value instead of the table value.
+                        var updatedTooltip = ytpa.lib.formatstring(selectedTooltip, comment);
                         chartData.setCell(selectedRow, selectedCol, updatedTooltip, updatedTooltip);
                         chart.draw(chartData, chartOptions);
                     });

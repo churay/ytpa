@@ -39,6 +39,19 @@
     };
 
     /**
+     * Generates a string from the argument string that represents the string
+     * with all {} substrings replaced by successive arguments.
+     *
+     * @see http://stackoverflow.com/a/4673436/837221
+     */
+    ytpa.lib.formatstring = function(string) {
+        var args = Array.prototype.slice.call(arguments, 1);
+        return string.replace(/\{(\d+)\}/g, function(match, number) {
+            return (typeof args[number] != 'undefined') ? args[number] : match;
+        });
+    };
+
+    /**
      * Generates a string that represents a comma-separated version of the
      * given number.
      */
