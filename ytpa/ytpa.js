@@ -112,7 +112,8 @@
     function ytpaQueryFormChannel() {
         try {
             var channelName = $('#ytpa-channel').val();
-            if (channelName.trim() == "") throw "Invalid channel name";
+            if(channelName.trim() == "")
+                throw new URIError("Invalid channel name");
 
             ytpa.query.youtube.playlists(channelName).then(function(playlists) {
                 playlists.sort(function(p1, p2) {
@@ -120,7 +121,7 @@
                 });
 
                 var playlistOptions = $('#ytpa-playlist');
-                if(channelName !== playlistOptions.attr('data-playlist')) {
+                if(channelName != playlistOptions.attr('data-playlist')) {
                     playlistOptions.empty();
                     playlistOptions.attr('data-playlist', channelName);
 

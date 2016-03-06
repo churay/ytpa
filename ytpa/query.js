@@ -184,7 +184,10 @@
 
         return reddit.search(videoURL).t('all').limit(10).sort('top').fetch(
         ).then(function(response) {
-            var bestThread = response.data.children[0];
+            if(response == undefined || response.data.children.length == 0)
+                return undefined;
+
+            var bestThread = response.data.children[0].data;
             for(var threadIdx in response.data.children) {
                 var thread = response.data.children[threadIdx].data;
 
@@ -198,6 +201,9 @@
                 bestThread.subreddit).limit(1).sort('top').fetch();
 
         }).then(function(response) {
+            if(response == undefined || response.length == 0 || response[1].data.children.length == 0)
+                return undefined;
+
             return {
                 thread: response[0].data.children[0].data,
                 comment: response[1].data.children[0].data,

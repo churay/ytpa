@@ -191,12 +191,17 @@
 
                     ytpa.query.reddit.topcomment(selectedVideoID, selectedChannel).then(
                     function(response) {
-                        var thread = response.thread, comment = response.comment;
-                        var formattedComment = ytpa.lib.formatstring(
-                            ytpa.templates.redditcomment, comment.author,
-                            comment.score, "Timestamp", comment.body,
-                            `https://reddit.com/${thread.permalink}`, thread.title,
-                            `https://reddit.com/r/${comment.subreddit}`, `/r/${comment.subreddit}`);
+                        var formattedComment = "[No Comment Found]";
+                        if(response != undefined) {
+                            var thread = response.thread
+                            var comment = response.comment;
+                            formattedComment = ytpa.lib.formatstring(
+                                ytpa.templates.redditcomment, comment.author,
+                                comment.score, "Timestamp", comment.body,
+                                `https://reddit.com/${thread.permalink}`, thread.title,
+                                `https://reddit.com/r/${comment.subreddit}`, `/r/${comment.subreddit}`);
+                        }
+
                         // NOTE(JRC): 'DataTable.setCell' is used here because
                         // the default behavior for 'DataTable.setValue' is to
                         // set the formatted value instead of the table value.
