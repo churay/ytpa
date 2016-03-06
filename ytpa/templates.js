@@ -18,7 +18,7 @@
                     <ol class="embed-list">
                         <li class="embed-list-item">
                             <article class="embed-comment ">
-                                <header class="embed-comment-header"><span class="embed-author">{0}/span>
+                                <header class="embed-comment-header"><span class="embed-author">{0}</span>
                                     <div class="embed-comment-meta">{1}</a>
                                         <a href="" data-redirect-type="timestamp" >
                                             <time class="live-timestamp">{2}</time>
@@ -34,8 +34,7 @@
                     </ol>
                 </div>
                 <footer class="embed-footer" role="contentinfo">
-                    <p>Subreddit: <a href="{4}">{5}</a> on <a href="{6}">{7}</a>
-                    </p>
+                    <p>From <a href="{4}">{5}</a> on <a href="{6}">{7}</a></p>
                 </footer>
             </div>
         </div>`;

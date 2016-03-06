@@ -198,7 +198,10 @@
                 bestThread.subreddit).limit(1).sort('top').fetch();
 
         }).then(function(response) {
-            return response[1].data.children[0].data.body;
+            return {
+                thread: response[0].data.children[0].data,
+                comment: response[1].data.children[0].data,
+            };
         });
     };
 
