@@ -188,6 +188,7 @@
                     var selectedVideoInfo = selectedTooltip.match(/data-id=".+"/gi)[0];
                     var selectedVideoID = selectedVideoInfo.substring(9, 20);
                     var selectedChannel = $('#ytpa-channel').val();
+                    var tooltipWidth = $(".ytpa-data-tooltip").width();
 
                     ytpa.query.reddit.topcomment(selectedVideoID, selectedChannel).then(
                     function(response) {
@@ -195,21 +196,23 @@
                         if(response != undefined) {
                             var thread = response.thread
                             var comment = response.comment;
+
                             var commentDate = new Date(0);
                             commentDate.setUTCSeconds(comment.created);
                             var commentDateString = ytpa.lib.formatdate(commentDate);
-                            var initialWidth = $(".ytpa-data-tooltip").width();
+
                             formattedComment = ytpa.lib.formatstring(
                                 ytpa.templates.redditcomment, comment.author,
                                 comment.score, commentDateString, comment.body,
                                 `https://reddit.com/${thread.permalink}`, thread.title,
-                                `https://reddit.com/r/${comment.subreddit}`, `/r/${comment.subreddit}`, initialWidth);
+                                `https://reddit.com/r/${comment.subreddit}`, `/r/${comment.subreddit}`,
+                                tooltipWidth);
                         }
 
                         // NOTE(JRC): 'DataTable.setCell' is used here because
                         // the default behavior for 'DataTable.setValue' is to
                         // set the formatted value instead of the table value.
-                        var updatedTooltip = ytpa.lib.formatstring(selectedTooltip, formattedComment, initialWidth);
+                        var updatedTooltip = ytpa.lib.formatstring(selectedTooltip, formattedComment);
                         chartData.setCell(selectedRow, selectedCol, updatedTooltip, updatedTooltip);
                         chart.draw(chartData, chartOptions);
                     });
