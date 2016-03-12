@@ -63,26 +63,27 @@
     padding: 20px;
     padding-right: 114px;
     position: relative;
-    /*width: 100%;*/
+    width: 100%;
     -webkit-box-sizing: border-box;
 }
  
 .embed-footer p {
-        display: table-cell;
+    width: 100%;
     margin: 0;
     padding: 0;
     vertical-align: middle;
+    white-space: pre-wrap !important;
+    overflow: hidden !important;
 }
  
 .embed-footer p a {
     color: #369;
     text-decoration: none;
+    width: 100%;
 }
  
 .frame {
-    width: 250px;
     display: block;
-    max-width: 800px;
     min-width: 220px;
     margin: 10px 0px;
     border-radius: 5px;
@@ -103,4 +104,9 @@
     max-width: 60em;
     overflow-wrap: break-word;
     word-wrap: break-word;
+}
+
+.md p {
+    white-space: pre-wrap;
+    overflow: hidden;
 }

@@ -12,7 +12,7 @@
 
     /** The string template for formal reddit comment displays. */
     ytpa.templates.redditcomment = `
-        <div class="frame">
+        <div class="frame" style="width:{8}px">
             <div class="embed">
                 <div class="embed-content">
                     <ol class="embed-list">
