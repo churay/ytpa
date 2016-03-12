@@ -1,0 +1,23 @@
+/**
+ * @file config.js
+ *
+ * The configuration script for the "ytpa" application, which loads all
+ * client-specific data and configuration.
+ */
+
+( function(ytpa, $, undefined) {
+    /// Public Members ///
+
+    ytpa.config = ytpa.config || {};
+
+    ytpa.config.appuser = 'public';
+
+    ytpa.config.appid = 'AIzaSyBIH9JB3vyF_ZNScwI3Ye528V9NZoP0fdM';
+
+    /** An object containing the spinner options (see http://fgnass.github.io/spin.js). */
+    ytpa.config.spinner = { lines: 10, length: 28, width: 3, radius: 1, scale: .25,
+        corners: 1, color: '#000', opacity: 0.25, rotate: 0, direction: 1, speed: 1,
+        trail: 60, fps: 20, zIndex: 2e9, className: 'spinner', top: '8px', left: '80px',
+        shadow: false, hwaccel: false, position: 'relative' };
+
+}(window.ytpa = window.ytpa || {}, jQuery) );
