@@ -39,6 +39,14 @@
     };
 
     /**
+     * Generates and returns a string of the form "MM DD, YYYY" for the given date.
+     */
+    ytpa.lib.formatdate = function(date) {
+        var monthName = monthNames[date.getMonth()];
+        return `${monthName} ${date.getDate()}, ${date.getFullYear()}`;
+    };
+
+    /**
      * Generates a string from the argument string that represents the string
      * with all {} substrings replaced by successive arguments.
      *
@@ -60,6 +68,10 @@
     };
 
     /// Private Members ///
+
+    /** An array containing the names of all the months for date formatting. */
+    var monthNames = [ "January", "February", "March", "April", "May", "June",
+        "July", "August", "September", "October", "November", "December" ];
 
     /** The object responsible for formatting all of the numbers. */
     var numberFormatter = new Intl.NumberFormat('en-US', {maximumFractionDigits: 3});

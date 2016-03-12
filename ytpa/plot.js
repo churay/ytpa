@@ -195,9 +195,14 @@
                         if(response != undefined) {
                             var thread = response.thread
                             var comment = response.comment;
+
+                            var commentDate = new Date(0);
+                            commentDate.setUTCSeconds(comment.created);
+                            var commentDateString = ytpa.lib.formatdate(commentDate);
+
                             formattedComment = ytpa.lib.formatstring(
                                 ytpa.templates.redditcomment, comment.author,
-                                comment.score, "Timestamp", comment.body,
+                                comment.score, commentDateString, comment.body,
                                 `https://reddit.com/${thread.permalink}`, thread.title,
                                 `https://reddit.com/r/${comment.subreddit}`, `/r/${comment.subreddit}`);
                         }
