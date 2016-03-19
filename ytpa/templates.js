@@ -12,31 +12,10 @@
 
     /** The string template for formal reddit comment displays. */
     ytpa.templates.redditcomment = `
-        <div class="frame" style="width:{8}px">
-            <div class="embed">
-                <div class="embed-content">
-                    <ol class="embed-list">
-                        <li class="embed-list-item">
-                            <article class="embed-comment ">
-                                <header class="embed-comment-header"><span class="embed-author">{0}</span>
-                                    <div class="embed-comment-meta">{1}</a>
-                                        <a href="" data-redirect-type="timestamp" >
-                                            <time class="live-timestamp">{2}</time>
-                                        </a>
-                                    </div>
-                                </header>
-                                <blockquote class="embed-comment-body">
-                                    <div class="md">
-                                        <p>{3}</p>
-                                    </div>
-                            </article>
-                        </li>
-                    </ol>
-                </div>
-                <footer class="embed-footer" role="contentinfo">
-                    <p>From <a href="{4}">{5}</a> on <a href="{6}">{7}</a></p>
-                </footer>
-            </div>
+        <div class="well well-sm" style="width:{8}px">
+            <p class="text-left"><strong>{0}</strong> <small>[{1} points]</small></p>
+            <p class="test-left md"><em>{3}</em></p>
+            <p class="text-right">From <a href="{4}">{5}</a> on <a href="{6}">{7}</a></p>
         </div>`;
 
 }(window.ytpa = window.ytpa || {}, jQuery) );
