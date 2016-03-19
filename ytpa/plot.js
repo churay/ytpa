@@ -181,7 +181,7 @@
 
         if(plotOptions.type != ytpa.plot.opts.type.AGGREGATE) {
             google.visualization.events.addListener(chart, 'onmouseover', function(e) {
-                return; // Keeping this here just in case we want to switch back to mouseover
+                //return; // Keeping this here just in case we want to switch back to mouseover
                 var selectedRow = e.row; var selectedCol = e.column + 1;
                 var selectedTooltip = chartData.getValue(selectedRow, selectedCol);
 
@@ -189,22 +189,6 @@
                     var selectedVideoInfo = selectedTooltip.match(/data-id=".+"/gi)[0];
                     var selectedVideoID = selectedVideoInfo.substring(9, 20);
                     var selectedChannel = $('#ytpa-channel').val();
-                    var updatedTooltip = ytpa.lib.formatstring(selectedTooltip, "[Comment not loaded]");
-                    chartData.setCell(selectedRow, selectedCol, updatedTooltip, updatedTooltip);
-                    chart.draw(chartData, chartOptions);
-                }
-            });
-
-            google.visualization.events.addListener(chart, 'select', function(e){
-                var selectedPoint = chart.getSelection()[0];
-                var selectedRow = selectedPoint.row; var selectedCol = selectedPoint.column + 1;
-                var selectedTooltip = chartData.getValue(selectedRow, selectedCol);
-
-                if(selectedTooltip.match(/\{(\d+)\}/g)) {
-                    var selectedVideoInfo = selectedTooltip.match(/data-id=".+"/gi)[0];
-                    var selectedVideoID = selectedVideoInfo.substring(9, 20);
-                    var selectedChannel = $('#ytpa-channel').val();
-                    var updatedTooltip = ytpa.lib.formatstring(selectedTooltip, "");
 
                     var tooltipWidth = $(".ytpa-data-tooltip").width();
                     ytpa.query.reddit.topcomment(selectedVideoID, selectedChannel).then(
@@ -224,19 +208,16 @@
                                     `https://reddit.com/${thread.permalink}`, thread.title,
                                     `https://reddit.com/r/${comment.subreddit}`, `/r/${comment.subreddit}`,
                                     tooltipWidth);
+                                
+                                $(".ytpa-data-tooltip > p").append(formattedComment);
+                                var frameHeight = $(".frame").height();
+                                $(".google-visualization-tooltip").css("height", "+="+frameHeight);
                             }
-
-                            // NOTE(JRC): 'DataTable.setCell' is used here because
-                            // the default behavior for 'DataTable.setValue' is to
-                            // set the formatted value instead of the table value.
-                            var updatedTooltip = ytpa.lib.formatstring(selectedTooltip, formattedComment);
-                            chartData.setCell(selectedRow, selectedCol, updatedTooltip, updatedTooltip);
-                            chart.draw(chartData, chartOptions);    
                     });
-                    chartData.setCell(selectedRow, selectedCol, updatedTooltip, updatedTooltip);
-                    chart.draw(chartData, chartOptions);
                 }
             });
+
+
         }
 
         chart.draw(chartData, chartOptions);
