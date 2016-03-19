@@ -210,8 +210,8 @@
                                     tooltipWidth);
                                 
                                 $(".ytpa-data-tooltip > p").append(formattedComment);
-                                var frameHeight = $(".frame").height();
-                                $(".google-visualization-tooltip").css("height", "+="+frameHeight);
+                                var frameHeight = $(".ytpa-reddit-frame").height();
+                                $(".google-visualization-tooltip").css("height", "+="+(frameHeight+10));
                             }
                     });
                 }
