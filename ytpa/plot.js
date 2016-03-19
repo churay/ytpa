@@ -256,7 +256,6 @@
         var chartOpts = {};
 
         chartOpts.title = `Playlist Comparison for "${$('#ytpa-channel').val()}"`;
-
         chartOpts.hAxis = {
             title: isAggChart ? `Playlist` : `Playlist ${chartScaleType}`,
             baselineColor: '#000000',
@@ -267,6 +266,7 @@
             baselineColor: '#000000',
         };
 
+        chartOpts.bar = isAggChart ? {groupWidth: '95%'} : undefined;
         chartOpts.tooltip = {isHtml: true};
         chartOpts.interpolateNulls = plotOptions.scale == ytpa.plot.opts.scale.RATIO;
         chartOpts.explorer = isPlotEmpty ? undefined :

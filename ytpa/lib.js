@@ -39,6 +39,24 @@
     };
 
     /**
+     * Creates a new list from two input lists of the same length where each
+     * item is a pair containing the values from each list at the same index.
+     */
+    ytpa.lib.zip = function(list1, list2) {
+        var list2 = (list2 !== undefined) ? list2 : list1;
+
+        if(list1.length != list2.length)
+            return [];
+
+        var zipList = [];
+        for(var lidx = 0; lidx < list1.length; ++lidx)
+            zipList.push([list1[lidx], list2[lidx]]);
+
+        return zipList;
+    };
+
+
+    /**
      * Generates and returns a string of the form "MM DD, YYYY" for the given date.
      */
     ytpa.lib.formatdate = function(date) {
