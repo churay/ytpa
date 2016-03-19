@@ -22,3 +22,14 @@
     text-overflow: ellipsis;
     width: 100%;
 }
+
+.test-left {
+    white-space: pre-wrap;
+    overflow: hidden;
+}
+
+.text-right {
+    vertical-align: middle;
+    white-space: pre-wrap !important;
+    overflow: hidden !important;
+}
