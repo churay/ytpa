@@ -115,7 +115,7 @@
                     `<div class="ytpa-data-tooltip" data-id="${videoID}"><p>
                         <b>Part ${videoRow + 1}</b>: ${videoTitle}<br>
                         <b>${ytpa.plot.opts.data.props[plotOptions.data].name}</b>: ${ytpa.lib.formatnumber(videoStat)}<br>
-                        <b>Top Comment</b>: {0}
+                        <b>Top Comment</b>:
                     </p></div>`
                 );
             }
