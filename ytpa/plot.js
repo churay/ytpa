@@ -115,7 +115,7 @@
                     `<div class="ytpa-data-tooltip" data-id="${videoID}"><p>
                         <b>Part ${videoRow + 1}</b>: ${videoTitle}<br>
                         <b>${ytpa.plot.opts.data.props[plotOptions.data].name}</b>: ${ytpa.lib.formatnumber(videoStat)}<br>
-                        <b>Top Comment</b>:
+                        <b>Top Comment</b>: {0}
                     </p></div>`
                 );
             }
@@ -192,32 +192,30 @@
 
                     var tooltipWidth = $(".ytpa-data-tooltip").width();
                     ytpa.query.reddit.topcomment(selectedVideoID, selectedChannel).then(
-                        function(response) {
-                            var formattedComment = "[No Comment Found]";
-                            if(response != undefined) {
-                                var thread = response.thread
-                                var comment = response.comment;
+                    function(response) {
+                        var formattedComment = "[No Comment Found]";
+                        if(response != undefined) {
+                            var thread = response.thread
+                            var comment = response.comment;
 
-                                var commentDate = new Date(0);
-                                commentDate.setUTCSeconds(comment.created);
-                                var commentDateString = ytpa.lib.formatdate(commentDate);
+                            var commentDate = new Date(0);
+                            commentDate.setUTCSeconds(comment.created);
+                            var commentDateString = ytpa.lib.formatdate(commentDate);
 
-                                formattedComment = ytpa.lib.formatstring(
-                                    ytpa.templates.redditcomment, comment.author,
-                                    comment.score, commentDateString, comment.body,
-                                    `https://reddit.com/${thread.permalink}`, thread.title,
-                                    `https://reddit.com/r/${comment.subreddit}`, `/r/${comment.subreddit}`,
-                                    tooltipWidth);
-                                
-                                $(".ytpa-data-tooltip > p").append(formattedComment);
-                                var frameHeight = $(".ytpa-reddit-frame").height();
-                                $(".google-visualization-tooltip").css("height", "+="+(frameHeight+10));
-                            }
+                            formattedComment = ytpa.lib.formatstring(
+                                ytpa.templates.redditcomment, comment.author,
+                                comment.score, commentDateString, comment.body,
+                                `https://reddit.com/${thread.permalink}`, thread.title,
+                                `https://reddit.com/r/${comment.subreddit}`,
+                                `/r/${comment.subreddit}`, tooltipWidth);
+                        }
+
+                        $(".ytpa-data-tooltip > p").append(formattedComment);
+                        var frameHeight = $(".ytpa-reddit-frame").height();
+                        $(".google-visualization-tooltip").css("height", "+="+(frameHeight+10));
                     });
                 }
             });
-
-
         }
 
         chart.draw(chartData, chartOptions);
