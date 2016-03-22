@@ -191,7 +191,7 @@
                 var tooltipWidth = $('.ytpa-data-tooltip').width();
                 ytpa.query.reddit.topcomment(selectedVideoID, selectedChannel).then(
                 function(response) {
-                    var formattedComment = '[No Comment Found]';
+                    var formattedComment = '[None Found]';
                     if(response !== undefined) {
                         var thread = response.thread
                         var comment = response.comment;
