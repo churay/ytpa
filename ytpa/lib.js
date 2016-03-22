@@ -88,8 +88,8 @@
     /// Private Members ///
 
     /** An array containing the names of all the months for date formatting. */
-    var monthNames = [ "January", "February", "March", "April", "May", "June",
-        "July", "August", "September", "October", "November", "December" ];
+    var monthNames = [ 'January', 'February', 'March', 'April', 'May', 'June',
+        'July', 'August', 'September', 'October', 'November', 'December' ];
 
     /** The object responsible for formatting all of the numbers. */
     var numberFormatter = new Intl.NumberFormat('en-US', {maximumFractionDigits: 3});

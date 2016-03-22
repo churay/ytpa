@@ -75,7 +75,7 @@
         var playlistSortDesc = plotOptions.type == ytpa.plot.opts.type.COLLECTION;
         var playlistSortCol = playlistSortDesc ? 1 : 0;
 
-        var channelName = $("#ytpa-channel").val();
+        var channelName = $('#ytpa-channel').val();
 
         var playlistChartDataList = [];
         for(var playlistID in ytpaPlottedPlaylists) {
@@ -113,9 +113,9 @@
                 playlistChartData.setValue(videoRow, 0, videoScaledIdx);
                 playlistChartData.setValue(videoRow, 2,
                     `<div class="ytpa-data-tooltip" data-id="${videoID}"><p>
-                        <b>Part ${videoRow + 1}</b>: ${videoTitle}<br>
+                        <b>Part ${videoRow + 1}</b>: <a href="https://www.youtube.com/watch?v=${videoID}">${videoTitle}</a><br>
                         <b>${ytpa.plot.opts.data.props[plotOptions.data].name}</b>: ${ytpa.lib.formatnumber(videoStat)}<br>
-                        <b>Top Comment</b>: {0}
+                        <b>Top Comment</b>: <em>Loading...</em>
                     </p></div>`
                 );
             }
@@ -144,7 +144,7 @@
 
                 var playlistTitle = playlistChartAggData.getValue(0, 0);
                 var playlistLength = playlistChartAggData.getValue(0, 1);
-                playlistChartAggData.setValue(0, 0, " ");
+                playlistChartAggData.setValue(0, 0, ' ');
                 playlistChartAggData.setValue(0, 3,
                     `<div class="ytpa-data-tooltip"><p>
                         <b>Playlist Name</b>: ${playlistTitle}<br>
@@ -181,40 +181,42 @@
 
         if(plotOptions.type != ytpa.plot.opts.type.AGGREGATE) {
             google.visualization.events.addListener(chart, 'onmouseover', function(e) {
-                //return; // Keeping this here just in case we want to switch back to mouseover
                 var selectedRow = e.row; var selectedCol = e.column + 1;
                 var selectedTooltip = chartData.getValue(selectedRow, selectedCol);
 
-                if(selectedTooltip.match(/\{(\d+)\}/g)) {
-                    var selectedVideoInfo = selectedTooltip.match(/data-id=".+"/gi)[0];
-                    var selectedVideoID = selectedVideoInfo.substring(9, 20);
-                    var selectedChannel = $('#ytpa-channel').val();
+                var selectedVideoInfo = selectedTooltip.match(/data-id=".+"/gi)[0];
+                var selectedVideoID = selectedVideoInfo.substring(9, 20);
+                var selectedChannel = $('#ytpa-channel').val();
 
-                    var tooltipWidth = $(".ytpa-data-tooltip").width();
-                    ytpa.query.reddit.topcomment(selectedVideoID, selectedChannel).then(
-                    function(response) {
-                        var formattedComment = "[No Comment Found]";
-                        if(response != undefined) {
-                            var thread = response.thread
-                            var comment = response.comment;
+                var tooltipWidth = $('.ytpa-data-tooltip').width();
+                ytpa.query.reddit.topcomment(selectedVideoID, selectedChannel).then(
+                function(response) {
+                    var formattedComment = '[No Comment Found]';
+                    if(response !== undefined) {
+                        var thread = response.thread
+                        var comment = response.comment;
 
-                            var commentDate = new Date(0);
-                            commentDate.setUTCSeconds(comment.created);
-                            var commentDateString = ytpa.lib.formatdate(commentDate);
+                        var commentDate = new Date(0);
+                        commentDate.setUTCSeconds(comment.created);
+                        var commentDateString = ytpa.lib.formatdate(commentDate);
 
-                            formattedComment = ytpa.lib.formatstring(
-                                ytpa.templates.redditcomment, comment.author,
-                                comment.score, commentDateString, comment.body,
-                                `https://reddit.com/${thread.permalink}`, thread.title,
-                                `https://reddit.com/r/${comment.subreddit}`,
-                                `/r/${comment.subreddit}`, tooltipWidth);
-                        }
+                        formattedComment = ytpa.lib.formatstring(
+                            ytpa.templates.redditcomment, comment.author,
+                            comment.score, commentDateString, comment.body,
+                            `https://reddit.com/${thread.permalink}`, thread.title,
+                            `https://reddit.com/r/${comment.subreddit}`,
+                            `/r/${comment.subreddit}`, tooltipWidth);
+                    }
 
-                        $(".ytpa-data-tooltip > p").append(formattedComment);
-                        var frameHeight = $(".ytpa-reddit-frame").height();
-                        $(".google-visualization-tooltip").css("height", "+="+(frameHeight+10));
-                    });
-                }
+                    var tooltipContent = $('.ytpa-data-tooltip > p').html();
+                    $('.ytpa-data-tooltip > p').html(
+                        tooltipContent.replace(/<em>Loading...<\/em>/, formattedComment)
+                    );
+
+                    var newFrameHeight = $('.ytpa-reddit-frame').height() +
+                        ((response !== undefined) ? 10 : 0);
+                    $('.google-visualization-tooltip').css('height', `+=${newFrameHeight}`);
+                });
             });
         }
 
