@@ -152,6 +152,7 @@
         return {
             type: $('#ytpa-graphtype').val(),
             data: $('#ytpa-statistic').val(),
+            meta: $('#ytpa-metastatistic').val(),
             scale: $('#ytpa-scale').val(),
             group: $('#ytpa-group').val(),
         };
