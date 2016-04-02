@@ -220,6 +220,11 @@
                         ((response !== undefined) ? 10 : 0);
                     $('.google-visualization-tooltip').css('height', `+=${newFrameHeight}`);
                     $('.google-visualization-tooltip').css('top', `-=${newFrameHeight}`);
+
+                    var newFrameTop = $('.google-visualization-tooltip').position().top;
+                    if(newFrameTop < 0) {
+                        $('.google-visualization-tooltip').css('top', `-=${newFrameTop - 5}`);
+                    }
                 });
             });
         }
@@ -251,8 +256,10 @@
             baselineColor: '#000000',
         };
 
-        chartOpts.bar = isAggChart ? {groupWidth: '95%'} : undefined;
+        chartOpts.legend = {position: 'right'};
         chartOpts.tooltip = {isHtml: true};
+
+        chartOpts.bar = isAggChart ? {groupWidth: '95%'} : undefined;
         chartOpts.interpolateNulls = plotOptions.scale == ytpa.plot.opts.scale.RATIO;
         chartOpts.explorer = isPlotEmpty ? undefined :
             {axis: 'horizontal', maxZoomOut: 1, keepInBounds: true};
