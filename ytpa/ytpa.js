@@ -53,13 +53,18 @@
         var redrawFormPlotAndOpts = function() {
             redrawFormPlot();
 
-            var isGroupSelected = $('#ytpa-graphtype').val() == 2;
-            var enabledForm = isGroupSelected ? $('#ytpa-group') : $('#ytpa-scale');
-            var disabledForm = isGroupSelected ? $('#ytpa-scale') : $('#ytpa-group');
+            var isAggSelected = $('#ytpa-graphtype').val() == 2;
 
+            var enabledForm = isAggSelected ? $('#ytpa-group') : $('#ytpa-scale');
+            var disabledForm = isAggSelected ? $('#ytpa-scale') : $('#ytpa-group');
             enabledForm.removeAttr('disabled');
             disabledForm.attr('disabled', 'disabled');
             $('.selectpicker').selectpicker('refresh');
+
+            var enabledFormDiv = isAggSelected ? $('#ytpa-group-div') : $('#ytpa-scale-div');
+            var disabledFormDiv = isAggSelected ? $('#ytpa-scale-div') : $('#ytpa-group-div');
+            enabledFormDiv.show();
+            disabledFormDiv.hide();
         };
 
         return new Promise(function(resolve) {
