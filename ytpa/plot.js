@@ -192,35 +192,44 @@
                 var selectedChannel = $('#ytpa-channel').val();
 
                 var tooltipWidth = $('.ytpa-data-tooltip').width();
-                ytpa.query.reddit.topcomment(selectedVideoID, selectedChannel).then(
-                function(response) {
-                    var formattedComment = '[None Found]';
-                    if(response !== undefined) {
-                        var thread = response.thread
-                        var comment = response.comment;
 
-                        var commentDate = new Date(0);
-                        commentDate.setUTCSeconds(comment.created);
-                        var commentDateString = ytpa.lib.formatdate(commentDate);
+                if (plotOptions.meta == ytpa.plot.opts.meta.RATIO) {
+                    ytpa.query.reddit.topcomment(selectedVideoID, selectedChannel).then(
+                    function(response) {
+                        var formattedComment = '[None Found]';
+                        if(response !== undefined) {
+                            var thread = response.thread
+                            var comment = response.comment;
 
-                        formattedComment = ytpa.lib.formatstring(
-                            ytpa.templates.redditcomment, comment.author,
-                            comment.score, commentDateString, comment.body,
-                            `https://reddit.com/${thread.permalink}`, thread.title,
-                            `https://reddit.com/r/${comment.subreddit}`,
-                            `/r/${comment.subreddit}`, tooltipWidth);
-                    }
+                            var commentDate = new Date(0);
+                            commentDate.setUTCSeconds(comment.created);
+                            var commentDateString = ytpa.lib.formatdate(commentDate);
 
+                            formattedComment = ytpa.lib.formatstring(
+                                ytpa.templates.redditcomment, comment.author,
+                                comment.score, commentDateString, comment.body,
+                                `https://reddit.com/${thread.permalink}`, thread.title,
+                                `https://reddit.com/r/${comment.subreddit}`,
+                                `/r/${comment.subreddit}`, tooltipWidth);
+                        }
+
+                        var tooltipContent = $('.ytpa-data-tooltip > p').html();
+                        $('.ytpa-data-tooltip > p').html(
+                            tooltipContent.replace(/<em>Loading...<\/em>/, formattedComment)
+                        );
+
+                        var newFrameHeight = $('.ytpa-reddit-frame').height() +
+                            ((response !== undefined) ? 10 : 0);
+                        $('.google-visualization-tooltip').css('height', `+=${newFrameHeight}`);
+                        $('.google-visualization-tooltip').css('top', `-=${newFrameHeight}`);
+                    });
+                }
+                else {
                     var tooltipContent = $('.ytpa-data-tooltip > p').html();
                     $('.ytpa-data-tooltip > p').html(
-                        tooltipContent.replace(/<em>Loading...<\/em>/, formattedComment)
+                        tooltipContent.replace(/<b>Top Comment<\/b>: <em>Loading...<\/em>/, "")
                     );
-
-                    var newFrameHeight = $('.ytpa-reddit-frame').height() +
-                        ((response !== undefined) ? 10 : 0);
-                    $('.google-visualization-tooltip').css('height', `+=${newFrameHeight}`);
-                    $('.google-visualization-tooltip').css('top', `-=${newFrameHeight}`);
-                });
+                }
             });
         }
 

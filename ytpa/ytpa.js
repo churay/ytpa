@@ -101,7 +101,7 @@
             $('#ytpa-statistic').change(redrawFormPlot);
             $('#ytpa-scale').change(redrawFormPlot);
             $('#ytpa-group').change(redrawFormPlot);
-
+            $('#ytpa-metastatistic').change(redrawFormPlot);
             $('#ytpa-graph').height($('#ytpa-graph').width());
 
             redrawFormPlotAndOpts();
