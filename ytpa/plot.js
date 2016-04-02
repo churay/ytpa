@@ -23,7 +23,7 @@
         2: {name: 'View-Normalized Likes', value: 2}, 3: {name: 'View-Normalized Dislikes', value: 3},
         4: {name: 'View-Normalized Comments', value: 4}, 5: {name: 'View-Normalized Participation', value: 5}}});
     /** An enumeration of all of the options for the metadata being displayed. **/
-    ytpa.plot.opts.meta = Object.freeze({INDEX: 0, RATIO: 1,
+    ytpa.plot.opts.meta = Object.freeze({NONE: 0, REDDIT_TOP: 1,
         props: {0: {name: 'None', value: 0}, 1: {name: 'Reddit Top Comment', value: 1}}});
     /** An enumeration of all of the scale types that can be used for the graph. **/
     ytpa.plot.opts.scale = Object.freeze({INDEX: 0, RATIO: 1,
@@ -112,13 +112,15 @@
                 var videoTitle = playlistChartData.getValue(videoRow, 6);
                 var videoScaledIdx = (plotOptions.scale == ytpa.plot.opts.scale.INDEX) ?
                     videoRow + 1 : videoRow / (playlistLength - 1);
+                var videoMeta = (plotOptions.meta == ytpa.plot.opts.meta.NONE) ?
+                    '' : '<b>Top Comment</b>: <em>Loading...</em>';
 
                 playlistChartData.setValue(videoRow, 0, videoScaledIdx);
                 playlistChartData.setValue(videoRow, 2,
                     `<div class="ytpa-data-tooltip" data-id="${videoID}"><p>
                         <b>Part ${videoRow + 1}</b>: <a href="https://www.youtube.com/watch?v=${videoID}">${videoTitle}</a><br>
                         <b>${ytpa.plot.opts.data.props[plotOptions.data].name}</b>: ${ytpa.lib.formatnumber(videoStat)}<br>
-                        <b>Top Comment</b>: <em>Loading...</em>
+                        ${videoMeta}
                     </p></div>`
                 );
             }
@@ -184,6 +186,8 @@
 
         if(plotOptions.type != ytpa.plot.opts.type.AGGREGATE) {
             google.visualization.events.addListener(chart, 'onmouseover', function(e) {
+                if(plotOptions.meta == ytpa.plot.opts.meta.NONE) { return; }
+
                 var selectedRow = e.row; var selectedCol = e.column + 1;
                 var selectedTooltip = chartData.getValue(selectedRow, selectedCol);
 
@@ -192,6 +196,7 @@
                 var selectedChannel = $('#ytpa-channel').val();
 
                 var tooltipWidth = $('.ytpa-data-tooltip').width();
+
                 ytpa.query.reddit.topcomment(selectedVideoID, selectedChannel).then(
                 function(response) {
                     var formattedComment = '[None Found]';
