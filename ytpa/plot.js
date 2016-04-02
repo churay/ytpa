@@ -219,6 +219,7 @@
                     var newFrameHeight = $('.ytpa-reddit-frame').height() +
                         ((response !== undefined) ? 10 : 0);
                     $('.google-visualization-tooltip').css('height', `+=${newFrameHeight}`);
+                    $('.google-visualization-tooltip').css('top', `-=${newFrameHeight}`);
                 });
             });
         }
