@@ -14,8 +14,10 @@
      */
     ytpa.init = function() {
         ytpaDocumentWait().then(ytpaDocumentInit).then(function() {
-            gapi.client.setApiKey(ytpa.config.appid);
-            return gapi.client.load('youtube', 'v3');
+            return gapi.client.init({
+                'apiKey': ytpa.config.appid,
+                'discoveryDocs': ['https://www.googleapis.com/discovery/v1/apis/youtube/v3/rest'],
+            });
         });
     };
 
@@ -73,16 +75,16 @@
             $('#ytpa-channel').keypress(function(e) {
                 if(e.which == 13) {
                     var target = $('.spinner-container').get(0);
-                    var spinner = new Spinner(ytpa.config.spinner).spin(target);
-                    $(document).on('populated', function() { spinner.stop(); });
+                    // var spinner = new Spinner(ytpa.config.spinner).spin(target);
+                    $(document).on('populated', function() { console.log('spin stop'); /*spinner.stop();*/ });
                     queryNewChannel();
                 } 
             });
 
             $('#ytpa-channel-submit').click(function() {
                 var target = $('.spinner-container').get(0);
-                var spinner = new Spinner(ytpa.config.spinner).spin(target);
-                $(document).on('populated', function() { spinner.stop(); });
+                // var spinner = new Spinner(ytpa.config.spinner).spin(target);
+                $(document).on('populated', function() { console.log('spin stop'); /*spinner.stop();*/ });
                 queryNewChannel();
             });
 

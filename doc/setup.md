@@ -6,7 +6,7 @@ a local version of this project. For now, it contains tidbits and notes on the p
 ### Process ###
 
 1. Create a local API key following the instructions [here][ytapi-keys].
-2. 
+2. Set up a local webserver to host the page by running `python -m SimpleHTTPServer 8000` in the base directory.
 
 ### Resources ###
 

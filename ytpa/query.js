@@ -34,6 +34,8 @@
             return ytpa.query.youtube.items( gapi.client.youtube.playlists.list,
                 plidRequestOptions, numResults );
 
+        }, function(error) {
+            console.log(error.body);
         }).then(function(response) {
             var playlistInfoBatchRequest = gapi.client.newBatch();
 
