@@ -5,6 +5,7 @@ a local version of this project. For now, it contains tidbits and notes on the p
 
 ### Process ###
 
+0. Create a new project for the API key (required according to [Stack Overflow posts][ytapi-err] and personal experience).
 1. Create a local API key following the instructions [here][ytapi-keys].
 2. Set up a local webserver to host the page by running `python -m SimpleHTTPServer 8000` in the base directory.
 
@@ -14,6 +15,8 @@ The information for this listing was pulled from the following resources:
 
 - [YouTube Analytics/Reporting APIs: Creating Keys][ytapi-keys]
 - [YouTube API Samples][ytapi-ex]
+- [Stack Overflow: YouTube API V3 Access Not Configured][ytapi-err]
 
 [ytapi-keys]: https://developers.google.com/youtube/reporting/guides/registering_an_application#Create_API_Keys
 [ytapi-ex]: https://github.com/youtube/api-samples
+[ytapi-err]: https://stackoverflow.com/a/54456853
