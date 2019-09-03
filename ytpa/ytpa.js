@@ -118,11 +118,12 @@
      */
     function ytpaQueryFormChannel() {
         try {
+            var queryType = $('#ytpa-search').val();
             var channelName = $('#ytpa-channel').val();
             if(channelName.trim() == '')
                 throw new URIError('Invalid channel name');
 
-            ytpa.query.youtube.playlists(channelName).then(function(playlists) {
+            ytpa.query.youtube.playlists(channelName, queryType).then(function(playlists) {
                 playlists.sort(function(p1, p2) {
                     return (p1.snippet.title > p2.snippet.title) ? 1 : -1;
                 });

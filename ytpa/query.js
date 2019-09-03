@@ -12,16 +12,27 @@
     ytpa.query.youtube = ytpa.query.youtube || {};
     ytpa.query.reddit = ytpa.query.reddit || {};
 
+    /** An object containing all of the option enumerations for plotting. **/
+    ytpa.query.opts = {};
+    /** An enumeration of all of the graph representation types. **/
+    ytpa.query.opts.search = Object.freeze({NAME: 0, ID: 1,
+        props: {0: {name: 'Channel Name', value: 0}, 1: {name: 'Channel ID', value: 1}}});
+
     // YouTube Query Functions //
 
     /**
      * Returns a promise that returns all of the playlist objects for a given user.
      */
-    ytpa.query.youtube.playlists = function(user, numResults) {
+    ytpa.query.youtube.playlists = function(user, searchType, numResults) {
         var uidRequestOptions = {
             part: 'id',
-            forUsername: user,
         };
+
+        if(searchType == ytpa.query.opts.search.NAME) {
+            uidRequestOptions["forUsername"] = user;
+        } else {
+            uidRequestOptions["id"] = user;
+        }
 
         var uidRequest = gapi.client.youtube.channels.list(uidRequestOptions);
         return uidRequest.then(function(response) {
