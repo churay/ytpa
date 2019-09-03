@@ -78,7 +78,7 @@
                     var spinner = new Spinner(ytpa.config.spinner).spin(target);
                     $(document).on('populated', function() { spinner.stop(); });
                     queryNewChannel();
-                } 
+                }
             });
 
             $('#ytpa-channel-submit').click(function() {

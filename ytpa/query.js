@@ -182,7 +182,11 @@
      * given channel's video.
      */
     ytpa.query.reddit.topcomment = function(videoID, channel) {
-        var videoURL = `url:https://www.youtube.com/watch?v=${videoID}`;
+        // TODO(JRC): On Reddit, it was once possible to search for just the
+        // URL of a YouTube video to find associated results (e.g.
+        // url:youtube.com/watch?v=...), but now it requires extracting the ID
+        // from the YouTube prefix and using the 'site' modifier instead.
+        var videoURL = `site:www.youtube.com AND url:v=${videoID}`;
 
         return reddit.search(videoURL).t('all').limit(10).sort('top').fetch(
         ).then(function(response) {
