@@ -26,13 +26,9 @@
     ytpa.query.youtube.playlists = function(user, searchType, numResults) {
         var uidRequestOptions = {
             part: 'id',
+            id: (searchType == ytpa.query.opts.search.ID) ? user : undefined,
+            forUsername: (searchType == ytpa.query.opts.search.NAME) ? user : undefined,
         };
-
-        if(searchType == ytpa.query.opts.search.NAME) {
-            uidRequestOptions["forUsername"] = user;
-        } else {
-            uidRequestOptions["id"] = user;
-        }
 
         var uidRequest = gapi.client.youtube.channels.list(uidRequestOptions);
         return uidRequest.then(function(response) {
@@ -158,6 +154,31 @@
             return playlistItems.sort(function(v1, v2) {
                 return (v1.snippet.publishedAt > v2.snippet.publishedAt) ? 1 : -1;
             });
+        });
+    };
+
+    /**
+     * Returns a promise that contains the top comment object for the given video.
+     */
+    ytpa.query.youtube.topcomment = function(videoID, channel) {
+        var requestOptions = {
+            part: 'snippet',
+            videoId: videoID,
+            maxItems: 1,
+            order: 'relevance',
+            textFormat: 'plainText',
+        };
+
+        var commentRequest = gapi.client.youtube.commentThreads.list(requestOptions);
+        return commentRequest.then(function(response) {
+            if(response == undefined || response.items.length == 0)
+                return undefined;
+
+            return response.items[0].snippet;
+
+        }, function(error) {
+            console.log(error.body);
+            return undefined;
         });
     };
 
