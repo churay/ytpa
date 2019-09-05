@@ -23,8 +23,9 @@
         2: {name: 'View-Normalized Likes', value: 2}, 3: {name: 'View-Normalized Dislikes', value: 3},
         4: {name: 'View-Normalized Comments', value: 4}, 5: {name: 'View-Normalized Participation', value: 5}}});
     /** An enumeration of all of the options for the metadata being displayed. **/
-    ytpa.plot.opts.meta = Object.freeze({NONE: 0, REDDIT_TOP: 1,
-        props: {0: {name: 'None', value: 0}, 1: {name: 'Reddit Top Comment', value: 1}}});
+    ytpa.plot.opts.meta = Object.freeze({NONE: 0, YOUTUBE_TOP: 1, REDDIT_TOP: 2,
+        props: {0: {name: 'None', value: 0}, 1: {name: 'YouTube Top Comment', value: 1},
+        2: {name: 'Reddit Top Comment', value: 2}}});
     /** An enumeration of all of the scale types that can be used for the graph. **/
     ytpa.plot.opts.scale = Object.freeze({INDEX: 0, RATIO: 1,
         props: {0: {name: 'Index', value: 0}, 1: {name: 'Ratio', value: 1}}});
@@ -197,23 +198,40 @@
 
                 var tooltipWidth = $('.ytpa-data-tooltip').width();
 
-                ytpa.query.reddit.topcomment(selectedVideoID, selectedChannel).then(
-                function(response) {
+                var metaFunc = (plotOptions.meta == ytpa.plot.opts.meta.YOUTUBE_TOP) ?
+                    ytpa.query.youtube.topcomment : ytpa.query.reddit.topcomment;
+                metaFunc(selectedVideoID, selectedChannel).then(function(response) {
                     var formattedComment = '[None Found]';
                     if(response !== undefined) {
-                        var thread = response.thread
-                        var comment = response.comment;
+                        if(plotOptions.meta == ytpa.plot.opts.meta.YOUTUBE_TOP) {
+                            var commentId = response.topLevelComment.id;
+                            var comment = response.topLevelComment.snippet;
 
-                        var commentDate = new Date(0);
-                        commentDate.setUTCSeconds(comment.created);
-                        var commentDateString = ytpa.lib.formatdate(commentDate);
+                            var commentDate = new Date(0);
+                            commentDate.setUTCSeconds(comment.updatedAt);
+                            var commentDateString = ytpa.lib.formatdate(commentDate);
 
-                        formattedComment = ytpa.lib.formatstring(
-                            ytpa.templates.redditcomment, comment.author,
-                            comment.score, commentDateString, comment.body,
-                            `https://reddit.com/${thread.permalink}`, thread.title,
-                            `https://reddit.com/r/${comment.subreddit}`,
-                            `/r/${comment.subreddit}`, tooltipWidth);
+                            formattedComment = ytpa.lib.formatstring(
+                                ytpa.templates.comment, comment.authorDisplayName,
+                                comment.likeCount, commentDateString, comment.textDisplay,
+                                comment.authorChannelUrl, comment.authorDisplayName,
+                                `https://www.youtube.com/watch?v=${selectedVideoID}&lc=${commentId}`,
+                                'YouTube', tooltipWidth);
+                        } else if(plotOptions.meta == ytpa.plot.opts.meta.REDDIT_TOP) {
+                            var thread = response.thread
+                            var comment = response.comment;
+
+                            var commentDate = new Date(0);
+                            commentDate.setUTCSeconds(comment.created);
+                            var commentDateString = ytpa.lib.formatdate(commentDate);
+
+                            formattedComment = ytpa.lib.formatstring(
+                                ytpa.templates.comment, comment.author,
+                                comment.score, commentDateString, comment.body,
+                                `https://reddit.com/${thread.permalink}`, thread.title,
+                                `https://reddit.com/r/${comment.subreddit}`,
+                                `/r/${comment.subreddit}`, tooltipWidth);
+                        }
                     }
 
                     var tooltipContent = $('.ytpa-data-tooltip > p').html();

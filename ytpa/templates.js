@@ -11,7 +11,7 @@
     ytpa.templates = ytpa.templates || {};
 
     /** The string template for formal reddit comment displays. */
-    ytpa.templates.redditcomment = `
+    ytpa.templates.comment = `
         <div class="well well-sm ytpa-reddit-frame" style="width:{8}px">
             <p class="text-left"><strong>{0}</strong> <small>[{1} points]</small></p>
             <p class="test-left md"><em>{3}</em></p>

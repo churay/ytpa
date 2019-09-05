@@ -171,10 +171,10 @@
 
         var commentRequest = gapi.client.youtube.commentThreads.list(requestOptions);
         return commentRequest.then(function(response) {
-            if(response == undefined || response.items.length == 0)
+            if(response == undefined || response.result == undefined || response.result.items.length == 0)
                 return undefined;
 
-            return response.items[0].snippet;
+            return response.result.items[0].snippet;
 
         }, function(error) {
             console.log(error.body);
