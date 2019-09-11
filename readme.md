@@ -6,11 +6,11 @@ A web-based visualization tool created to assist in the analysis of YouTube play
 
 ### Playlist Analysis ###
 
-!['ytpa' demo 1](https://github.com/churay/hmp/raw/master/doc/demo1.gif)
+!['ytpa' demo 1](https://github.com/churay/ytpa/raw/master/doc/demo1.gif)
 
 ### Playlist Comparison ###
 
-!['ytpa' demo 2](https://github.com/churay/hmp/raw/master/doc/demo2.gif)
+!['ytpa' demo 2](https://github.com/churay/ytpa/raw/master/doc/demo2.gif)
 
 ## Dependencies ##
 
