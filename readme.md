@@ -1,8 +1,16 @@
 # YouTube Playlist Analyzer #
 
-## Description ##
-
 A web-based visualization tool created to assist in the analysis of YouTube playlist data.
+
+## Demos ##
+
+### Playlist Analysis ###
+
+!['ytpa' demo 1](https://github.com/churay/hmp/raw/master/doc/demo1.gif)
+
+### Playlist Comparison ###
+
+!['ytpa' demo 2](https://github.com/churay/hmp/raw/master/doc/demo2.gif)
 
 ## Dependencies ##
 
