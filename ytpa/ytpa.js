@@ -117,40 +117,38 @@
      * populates the form playlists with this channel's information.
      */
     function ytpaQueryFormChannel() {
-        try {
-            var queryType = $('#ytpa-search').val();
-            var channelName = $('#ytpa-channel').val();
-            if(channelName.trim() == '')
-                throw new URIError('Invalid channel name');
+        var queryType = $('#ytpa-search').val();
+        var channelName = $('#ytpa-channel').val();
 
-            ytpa.query.youtube.playlists(channelName, queryType).then(function(playlists) {
-                playlists.sort(function(p1, p2) {
-                    return (p1.snippet.title > p2.snippet.title) ? 1 : -1;
-                });
-
-                var playlistOptions = $('#ytpa-playlist');
-                if(channelName != playlistOptions.attr('data-playlist')) {
-                    playlistOptions.empty();
-                    playlistOptions.attr('data-playlist', channelName);
-
-                    for(var playlistIdx in playlists) {
-                        var playlist = playlists[playlistIdx];
-                        var playlistElement = document.createElement('option');
-
-                        playlistElement.setAttribute('value', playlist.id);
-                        playlistElement.setAttribute('class', 'ytpa-select-option');
-                        playlistElement.setAttribute('title', playlist.snippet.title);
-                        playlistElement.innerHTML = playlist.snippet.title;
-                        playlistOptions.append(playlistElement);
-                    }
-                }
-                $(document).trigger('populated');
-                playlistOptions.selectpicker('refresh');
+        ytpa.query.youtube.playlists(channelName, queryType).then(function(playlists) {
+            playlists.sort(function(p1, p2) {
+                return (p1.snippet.title > p2.snippet.title) ? 1 : -1;
             });
-        } catch(error) {
-            console.log('Invalid channel name!');
+
+            var playlistOptions = $('#ytpa-playlist');
+            if(channelName != playlistOptions.attr('data-playlist')) {
+                playlistOptions.empty();
+                playlistOptions.attr('data-playlist', channelName);
+
+                for(var playlistIdx in playlists) {
+                    var playlist = playlists[playlistIdx];
+                    var playlistElement = document.createElement('option');
+
+                    playlistElement.setAttribute('value', playlist.id);
+                    playlistElement.setAttribute('class', 'ytpa-select-option');
+                    playlistElement.setAttribute('title', playlist.snippet.title);
+                    playlistElement.innerHTML = playlist.snippet.title;
+                    playlistOptions.append(playlistElement);
+                }
+            }
             $(document).trigger('populated');
-        }
+            playlistOptions.selectpicker('refresh');
+
+        }, function(error) {
+            var queryTypeName = ytpa.query.opts.search.props[parseInt(queryType)].name;
+            alert(`Invalid ${queryTypeName} '${channelName}'!`);
+            $(document).trigger('populated');
+        });
     }
 
     /**
