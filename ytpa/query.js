@@ -30,6 +30,7 @@
             forUsername: (searchType == ytpa.query.opts.search.NAME) ? user : undefined,
         };
 
+        // FIXME: estimated cost: 1
         var uidRequest = gapi.client.youtube.channels.list(uidRequestOptions);
         return uidRequest.then(function(response) {
             var channelID = response.result.items[0].id;
@@ -38,6 +39,7 @@
                 channelId: channelID,
             };
 
+            // FIXME: estimated cost: 1 * ceil(|P| / 50)
             return ytpa.query.youtube.items( gapi.client.youtube.playlists.list,
                 plidRequestOptions, numResults );
 
@@ -53,6 +55,7 @@
                 playlistInfoBatchRequest.add(playlistRequest);
             }
 
+            // FIXME: estimated cost: (2 + 1) * |P|
             return playlistInfoBatchRequest;
 
         }).then(function(response) {
@@ -77,6 +80,7 @@
             forUsername: user,
         };
 
+        // FIXME: estimated cost: 3
         var uplRequest = gapi.client.youtube.channels.list(uplRequestOptions);
         return uplRequest.then(function(response) {
             var uploadsPLID = response.result.items[0].contentDetails.relatedPlaylists.uploads;
@@ -85,6 +89,7 @@
                 playlistId: uploadsPLID,
             };
 
+            // FIXME: estimated cost: 3 * ceil(|V| / 50)
             return ytpa.query.youtube.items( gapi.client.youtube.playlistItems.list,
                 uplplRequestOptions, numResults );
 
@@ -100,6 +105,7 @@
                 playlistBatchRequest.add(videoRequest);
             }
 
+            // FIXME: estimated cost: 3 * |V|
             return playlistBatchRequest;
 
         }).then(function(response) {
@@ -124,6 +130,7 @@
             playlistId: playlistID,
         };
 
+        // FIXME: estimated cost: 3 * ceil(|p_v| / 50)
         return ytpa.query.youtube.items(gapi.client.youtube.playlistItems.list,
             requestOptions ).then(function(response) {
             var playlistBatchRequest = gapi.client.newBatch();
@@ -137,6 +144,7 @@
                 playlistBatchRequest.add(videoRequest);
             }
 
+            // FIXME: estimated cost: 5 * |p_v|
             return playlistBatchRequest;
 
         }).then(function(response) {
@@ -167,6 +175,7 @@
             textFormat: 'plainText',
         };
 
+        // FIXME: estimated cost: (2 + 1) * 1
         var commentRequest = gapi.client.youtube.commentThreads.list(requestOptions);
         return commentRequest.then(function(response) {
             if(response == undefined || response.result == undefined || response.result.items.length == 0)
