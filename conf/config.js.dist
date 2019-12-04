@@ -16,6 +16,9 @@
     // TODO: Fill in the API key for the application here.
     ytpa.config.appid = '';
 
+    // TODO: Fill in the quota for the API key above here (default: 10k).
+    ytpa.config.appquota = 10000;
+
     /** An object containing the spinner options (see http://fgnass.github.io/spin.js). */
     ytpa.config.spinner = { lines: 10, length: 28, width: 3, radius: 1, scale: .25,
         corners: 1, color: '#000', opacity: 0.25, rotate: 0, direction: 1, speed: 1,

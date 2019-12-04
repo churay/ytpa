@@ -50,6 +50,21 @@
      * Returns a promise that yields true when the application page is initialized.
      */
     function ytpaDocumentInit() {
+        var redrawQuotaPanel = function() {
+            var quotaNow = ytpa.query.data.ytquota.session;
+            var quotaMax = ytpa.query.data.ytquota.maximum;
+            var quotaUse = Math.min((quotaNow / quotaMax) * 100.0, 100.0);
+            var aboveQuota = quotaNow > quotaMax;
+
+            $('#ytpa-quota-label').html(`Usage: ${quotaNow} / ${quotaMax}`);
+            $('#ytpa-quota-bar').attr('aria-valuenow', quotaUse);
+            $('#ytpa-quota-bar').css('width', `${quotaUse}%`);
+            $('#ytpa-quota-bar').html(`${quotaUse}${aboveQuota ? '+' : ''}%`);
+
+            if(aboveQuota && !$('#ytpa-quota-bar').hasClass('progress-bar-danger')) {
+                $('#ytpa-quota-bar').addClass('progress-bar-danger');
+            }
+        };
         var redrawFormPlot = function() { ytpa.plot.draw(ytpaGetFormPlotOptions()); };
         var queryNewChannel = function() { ytpaQueryFormChannel(); ytpa.plot.clear(); redrawFormPlot(); };
         var redrawFormPlotAndOpts = function() {

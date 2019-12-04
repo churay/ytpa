@@ -12,11 +12,20 @@
     ytpa.query.youtube = ytpa.query.youtube || {};
     ytpa.query.reddit = ytpa.query.reddit || {};
 
-    /** An object containing all of the option enumerations for plotting. **/
+    /** An object containing all of the option enumerations for querying. **/
     ytpa.query.opts = {};
     /** An enumeration of all of the graph representation types. **/
     ytpa.query.opts.search = Object.freeze({NAME: 0, ID: 1,
         props: {0: {name: 'Channel Name', value: 0}, 1: {name: 'Channel ID', value: 1}}});
+
+    /** An object containing metadata assocaited with querying. */
+    ytpa.query.data = {};
+    /** An object containing metadata associated with the YouTube Data API quota. */
+    ytpa.query.data.ytquota = {};
+    /** The amount of YouTube Data API quota used during the current session. */
+    ytpa.query.data.ytquota.session = 0;
+    /** The limit to the YouTube Data API quota for the application's API key. */
+    ytpa.query.data.ytquota.maximum = ytpa.config.appquota;
 
     // YouTube Query Functions //
 
