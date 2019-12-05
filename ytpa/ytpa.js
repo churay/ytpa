@@ -18,6 +18,8 @@
                 'apiKey': ytpa.config.appid,
                 'discoveryDocs': ['https://www.googleapis.com/discovery/v1/apis/youtube/v3/rest'],
             });
+        }).then(function() {
+            ytpa.query.init();
         });
     };
 
@@ -50,13 +52,15 @@
      * Returns a promise that yields true when the application page is initialized.
      */
     function ytpaDocumentInit() {
+        // Rendering Helpers //
+
         var redrawQuotaPanel = function() {
             var quotaNow = ytpa.query.data.ytquota.session;
             var quotaMax = ytpa.query.data.ytquota.maximum;
             var quotaUse = Math.min((quotaNow / quotaMax) * 100.0, 100.0);
             var aboveQuota = quotaNow > quotaMax;
 
-            $('#ytpa-quota-label').html(`Usage: ${quotaNow} / ${quotaMax}`);
+            $('#ytpa-quota-label').html(`Session: ${quotaNow} / ${quotaMax}`);
             $('#ytpa-quota-bar').attr('aria-valuenow', quotaUse);
             $('#ytpa-quota-bar').css('width', `${quotaUse}%`);
             $('#ytpa-quota-bar').html(`${quotaUse}${aboveQuota ? '+' : ''}%`);
@@ -65,8 +69,18 @@
                 $('#ytpa-quota-bar').addClass('progress-bar-danger');
             }
         };
-        var redrawFormPlot = function() { ytpa.plot.draw(ytpaGetFormPlotOptions()); };
-        var queryNewChannel = function() { ytpaQueryFormChannel(); ytpa.plot.clear(); redrawFormPlot(); };
+
+        var redrawFormPlot = function() {
+            ytpa.plot.draw(ytpaGetFormPlotOptions());
+        };
+
+        var queryNewChannel = function() {
+            ytpaQueryFormChannel();
+            ytpa.plot.clear();
+            redrawFormPlot();
+            redrawQuotaPanel();
+        };
+
         var redrawFormPlotAndOpts = function() {
             redrawFormPlot();
 
@@ -83,6 +97,8 @@
             enabledFormDiv.show();
             disabledFormDiv.hide();
         };
+
+        // Initialization Logic //
 
         return new Promise(function(resolve) {
             $('.selectpicker').selectpicker();
@@ -112,6 +128,7 @@
                     return $(this).text(); }).get();
 
                 ytpa.plot.playlists(playlistNames, playlistIDs, ytpaGetFormPlotOptions());
+                redrawQuotaPanel();
             });
 
             $('#ytpa-graphtype').change(redrawFormPlotAndOpts);

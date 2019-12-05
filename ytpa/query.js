@@ -30,6 +30,71 @@
     // YouTube Query Functions //
 
     /**
+     * Returns a promise that resolve when the 'query' library has been initialized.
+     * TODO(JRC): Actually make this return a promise so that loading order issues
+     * can be fixed.
+     */
+    ytpa.query.init = function() {
+        // NOTE(JRC): The quota estimations embedded in this function were derived
+        // from YouTube's official API cost guidelines:
+        // https://developers.google.com/youtube/v3/getting-started#calculating-quota-usage
+        // TODO(JRC): The following estimates are not perfect for all the YouTube API
+        // calls, but accurately capture the costs of all calls used by this application.
+        // At least one function that's improperly estimated is 'search', which costs 100
+        // units base per call.
+        var calcGAPIBaseCost = function(func, args) {
+            return func.match(/^((list)|(get)).*/g) ? 1 : 50;
+        };
+        var calcGAPIPartCost = function(func, args) {
+            var partCost = 0;
+            if(args.length > 0) {
+                var request = args[0];
+                if(typeof(request) === 'object' && request.hasOwnProperty('part')) {
+                    for(var partName in request['part'].split(',')) {
+                        partCost += !partName.match(/^id$/g) ? 2 : 0;
+                    }
+                }
+            }
+            return partCost;
+        };
+
+        // NOTE(JRC): This function is necessary in order to generate a closure,
+        // which copies the values of the arguments at call time and allows the
+        // wrapped function to be called when this initialization function exits.
+        var genGAPICostWrapper = function(gapiEntry, gapiEntryName) {
+            return function() {
+                var apiCost = calcGAPIBaseCost(gapiEntryName, arguments) +
+                    calcGAPIPartCost(gapiEntryName, arguments);
+                ytpa.query.data.ytquota.session += apiCost;
+                return gapiEntry.apply(undefined, arguments);
+
+                // TODO(JRC): This solution is better but it doesn't interact
+                // well with 'gapi.client.newBatch()' for some reason; this needs
+                // to be fixed.
+                /*
+                return gapiEntry.apply(undefined, arguments).then(function(response) {
+                    ytpa.query.data.ytquota.session += apiCost;
+                    return response;
+                }, function(error) {
+                    ytpa.query.data.ytquota.session += apiCost;
+                    throw error;
+                });
+                */
+            };
+        };
+
+        for(var gapiCategoryName of Object.keys(gapi.client.youtube)) {
+            var gapiCategory = gapi.client.youtube[gapiCategoryName];
+            for(var gapiEntryName of Object.keys(gapiCategory)) {
+                var gapiEntry = gapiCategory[gapiEntryName];
+                if(typeof(gapiEntry) === 'function') {
+                    // gapiCategory[gapiEntryName] = genGAPICostWrapper(gapiEntry, gapiEntryName);
+                }
+            }
+        }
+    };
+
+    /**
      * Returns a promise that returns all of the playlist objects for a given user.
      */
     ytpa.query.youtube.playlists = function(user, searchType, numResults) {
@@ -39,7 +104,6 @@
             forUsername: (searchType == ytpa.query.opts.search.NAME) ? user : undefined,
         };
 
-        // FIXME: estimated cost: 1
         var uidRequest = gapi.client.youtube.channels.list(uidRequestOptions);
         return uidRequest.then(function(response) {
             var channelID = response.result.items[0].id;
@@ -48,7 +112,6 @@
                 channelId: channelID,
             };
 
-            // FIXME: estimated cost: 1 * ceil(|P| / 50)
             return ytpa.query.youtube.items( gapi.client.youtube.playlists.list,
                 plidRequestOptions, numResults );
 
@@ -64,7 +127,6 @@
                 playlistInfoBatchRequest.add(playlistRequest);
             }
 
-            // FIXME: estimated cost: (2 + 1) * |P|
             return playlistInfoBatchRequest;
 
         }).then(function(response) {
@@ -89,7 +151,6 @@
             forUsername: user,
         };
 
-        // FIXME: estimated cost: 3
         var uplRequest = gapi.client.youtube.channels.list(uplRequestOptions);
         return uplRequest.then(function(response) {
             var uploadsPLID = response.result.items[0].contentDetails.relatedPlaylists.uploads;
@@ -98,7 +159,6 @@
                 playlistId: uploadsPLID,
             };
 
-            // FIXME: estimated cost: 3 * ceil(|V| / 50)
             return ytpa.query.youtube.items( gapi.client.youtube.playlistItems.list,
                 uplplRequestOptions, numResults );
 
@@ -114,7 +174,6 @@
                 playlistBatchRequest.add(videoRequest);
             }
 
-            // FIXME: estimated cost: 3 * |V|
             return playlistBatchRequest;
 
         }).then(function(response) {
@@ -139,7 +198,6 @@
             playlistId: playlistID,
         };
 
-        // FIXME: estimated cost: 3 * ceil(|p_v| / 50)
         return ytpa.query.youtube.items(gapi.client.youtube.playlistItems.list,
             requestOptions ).then(function(response) {
             var playlistBatchRequest = gapi.client.newBatch();
@@ -153,7 +211,6 @@
                 playlistBatchRequest.add(videoRequest);
             }
 
-            // FIXME: estimated cost: 5 * |p_v|
             return playlistBatchRequest;
 
         }).then(function(response) {
@@ -184,7 +241,6 @@
             textFormat: 'plainText',
         };
 
-        // FIXME: estimated cost: (2 + 1) * 1
         var commentRequest = gapi.client.youtube.commentThreads.list(requestOptions);
         return commentRequest.then(function(response) {
             if(response == undefined || response.result == undefined || response.result.items.length == 0)
