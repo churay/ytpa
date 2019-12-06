@@ -31,8 +31,6 @@
 
     /**
      * Returns a promise that resolve when the 'query' library has been initialized.
-     * TODO(JRC): Actually make this return a promise so that loading order issues
-     * can be fixed.
      */
     ytpa.query.init = function() {
         // NOTE(JRC): The quota estimations embedded in this function were derived
@@ -48,9 +46,8 @@
         var calcGAPIPartCost = function(func, args) {
             var partCost = 0;
             if(args.length > 0) {
-                var request = args[0];
-                if(typeof(request) === 'object' && request.hasOwnProperty('part')) {
-                    for(var partName in request['part'].split(',')) {
+                if(typeof(args[0]) === 'object' && args[0].hasOwnProperty('part')) {
+                    for(var partName of args[0]['part'].split(',')) {
                         partCost += !partName.match(/^id$/g) ? 2 : 0;
                     }
                 }
@@ -83,15 +80,19 @@
             };
         };
 
-        for(var gapiCategoryName of Object.keys(gapi.client.youtube)) {
-            var gapiCategory = gapi.client.youtube[gapiCategoryName];
-            for(var gapiEntryName of Object.keys(gapiCategory)) {
-                var gapiEntry = gapiCategory[gapiEntryName];
-                if(typeof(gapiEntry) === 'function') {
-                    // gapiCategory[gapiEntryName] = genGAPICostWrapper(gapiEntry, gapiEntryName);
+        return new Promise(function(resolve) {
+            for(var gapiCategoryName of Object.keys(gapi.client.youtube)) {
+                var gapiCategory = gapi.client.youtube[gapiCategoryName];
+                for(var gapiEntryName of Object.keys(gapiCategory)) {
+                    var gapiEntry = gapiCategory[gapiEntryName];
+                    if(typeof(gapiEntry) === 'function') {
+                        gapiCategory[gapiEntryName] = genGAPICostWrapper(gapiEntry, gapiEntryName);
+                    }
                 }
             }
-        }
+
+            resolve();
+        });
     };
 
     /**

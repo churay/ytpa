@@ -18,9 +18,7 @@
                 'apiKey': ytpa.config.appid,
                 'discoveryDocs': ['https://www.googleapis.com/discovery/v1/apis/youtube/v3/rest'],
             });
-        }).then(function() {
-            ytpa.query.init();
-        });
+        }).then(ytpa.query.init);
     };
 
     /// Private Members ///
