@@ -64,19 +64,6 @@
                     calcGAPIPartCost(gapiEntryName, arguments);
                 ytpa.query.data.ytquota.session += apiCost;
                 return gapiEntry.apply(undefined, arguments);
-
-                // TODO(JRC): This solution is better but it doesn't interact
-                // well with 'gapi.client.newBatch()' for some reason; this needs
-                // to be fixed.
-                /*
-                return gapiEntry.apply(undefined, arguments).then(function(response) {
-                    ytpa.query.data.ytquota.session += apiCost;
-                    return response;
-                }, function(error) {
-                    ytpa.query.data.ytquota.session += apiCost;
-                    throw error;
-                });
-                */
             };
         };
 

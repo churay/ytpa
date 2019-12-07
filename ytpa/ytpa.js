@@ -73,10 +73,8 @@
         };
 
         var queryNewChannel = function() {
-            ytpaQueryFormChannel();
-            ytpa.plot.clear();
-            redrawFormPlot();
-            redrawQuotaPanel();
+            ytpaQueryFormChannel().then(ytpa.plot.clear)
+                .then(redrawFormPlot).then(redrawQuotaPanel);
         };
 
         var redrawFormPlotAndOpts = function() {
@@ -125,8 +123,8 @@
                 var playlistNames = playlistObjects.map(function() {
                     return $(this).text(); }).get();
 
-                ytpa.plot.playlists(playlistNames, playlistIDs, ytpaGetFormPlotOptions());
-                redrawQuotaPanel();
+                return ytpa.plot.playlists(playlistNames, playlistIDs, ytpaGetFormPlotOptions())
+                    .then(redrawQuotaPanel);
             });
 
             $('#ytpa-graphtype').change(redrawFormPlotAndOpts);
@@ -150,7 +148,7 @@
         var queryType = $('#ytpa-search').val();
         var channelName = $('#ytpa-channel').val();
 
-        ytpa.query.youtube.playlists(channelName, queryType).then(function(playlists) {
+        return ytpa.query.youtube.playlists(channelName, queryType).then(function(playlists) {
             playlists.sort(function(p1, p2) {
                 return (p1.snippet.title > p2.snippet.title) ? 1 : -1;
             });
